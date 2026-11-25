@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>amivoice-live | 勉強会のためのリアルタイム字幕</title>
+    <meta name="description" content="スライドから技術用語の辞書を作り、AmiVoice API で登壇をリアルタイムに字幕にします。参加者はスマホで QR コードを読むだけで見られます。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/client/styles.css" />
+  </head>
+  <body class="home">
+    <header class="home-bar">
+      <span class="wordmark">amivoice-live</span>
+      <a href="https://github.com/ponyo877/amivoice-live">ソースコード</a>
+    </header>
+
+    <main class="home-main">
+      <section class="hero">
+        <h1>技術用語まで、聞き取れる字幕を。</h1>
+        <p class="lede">登壇スライドから誤認識されやすい語を辞書にして、AmiVoice API でリアルタイムに字幕を出します。参加者は QR コードを読むだけで、手元のスマホで字幕を追えます。</p>
+
+        <figure class="hero-demo" aria-label="辞書の有無による字幕の違いの例">
+          <div class="demo-row">
+            <span class="demo-tag">辞書なし</span>
+            <p class="caption-line is-wrong">デュラブルオブジェクトで、部屋ごとにウェブソケットをハイバネーションさせます</p>
+          </div>
+          <div class="demo-row">
+            <span class="demo-tag is-on">辞書あり</span>
+            <p class="caption-line"><mark class="term">Durable Objects</mark> で、部屋ごとに <mark class="term">WebSocket</mark> を <mark class="term">Hibernation</mark> させます</p>
+          </div>
+          <figcaption>下線の語は、スライドから作った辞書で正しく認識できた語です。</figcaption>
+        </figure>
+      </section>
+
+      <section class="steps" aria-labelledby="steps-heading">
+        <h2 id="steps-heading">使い方</h2>
+        <ol>
+          <li><strong>ルームを作る。</strong>勉強会の名前を入れて作ると、登壇者の画面が開きます。</li>
+          <li><strong>スライドから辞書を作る。</strong>PDF を渡すと、製品名や略語とその読みを Claude が抜き出します。</li>
+          <li><strong>配信を始めて QR コードを見せる。</strong>参加者のスマホとプロジェクターに同じ字幕が流れます。</li>
+        </ol>
+      </section>
+
+      <section class="create" aria-labelledby="create-heading">
+        <h2 id="create-heading">ルームを作る</h2>
+        <form id="create-form" class="create-form">
+          <label class="field">
+            <span>勉強会の名前</span>
+            <input type="text" name="title" maxlength="100" required placeholder="例: Workers LT #12" />
+          </label>
+          <label class="field">
+            <span>合言葉<small>（公開環境で設定されている場合）</small></span>
+            <input type="password" name="passphrase" autocomplete="off" />
+          </label>
+          <button type="submit" class="button primary">ルームを作る</button>
+          <p class="status" id="create-status" role="status"></p>
+        </form>
+        <p class="hint" id="resume" hidden>前に使ったルームの<a id="resume-link" href="/speaker.html">登壇者の画面を開く</a></p>
+      </section>
+    </main>
+
+    <footer class="home-foot">
+      <p>音声認識に <a href="https://acp.amivoice.com/amivoice_api/">AmiVoice API</a>、辞書づくりに Claude を使っています。音声は字幕にするためだけに送り、AmiVoice 側にはログを残さない接続先を使います。</p>
+    </footer>
+    <script type="module" src="/src/client/home.ts"></script>
+  </body>
+</html>

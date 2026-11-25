@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登壇者の画面 | amivoice-live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/client/styles.css" />
+  </head>
+  <body class="console">
+    <header class="console-bar">
+      <a class="wordmark" href="/">amivoice-live</a>
+      <h1 class="console-title" id="title">読み込み中…</h1>
+      <span class="tally" id="tally" data-live="false">
+        <span class="tally-dot" aria-hidden="true"></span>
+        <span id="tally-text">待機中</span>
+      </span>
+    </header>
+
+    <div class="console-grid">
+      <aside class="panel controls" aria-label="配信の操作">
+        <section class="group">
+          <h2>音声</h2>
+          <label class="field">
+            <span>入力</span>
+            <select id="source">
+              <option value="mic">マイク</option>
+              <option value="tab">ブラウザのタブの音声</option>
+              <option value="file">音声ファイル</option>
+            </select>
+          </label>
+          <label class="field" id="mic-field">
+            <span>マイク</span>
+            <select id="mic"><option value="">既定のマイク</option></select>
+          </label>
+          <label class="field" id="file-field" hidden>
+            <span>ファイル</span>
+            <input type="file" id="audio-file" accept="audio/*,video/*" />
+          </label>
+          <label class="field">
+            <span>認識エンジン</span>
+            <select id="engine"></select>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="use-dictionary" checked />
+            <span>辞書を使う（<span id="term-count">0</span> 語）</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="diarization" />
+            <span>話者を色分けする（質疑応答向け）</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="archive" checked />
+            <span>録音して、終了後にアーカイブ字幕と振り返りを作る</span>
+          </label>
+          <div class="meter" aria-hidden="true"><div class="meter-fill" id="meter"></div></div>
+          <button type="button" class="button primary" id="toggle">配信を始める</button>
+          <p class="status" id="status" role="status"></p>
+        </section>
+
+        <section class="group">
+          <h2>参加者に共有</h2>
+          <canvas id="qr" width="168" height="168" aria-label="参加者用の字幕ページの QR コード"></canvas>
+          <div class="share-row">
+            <input type="text" id="viewer-url" readonly aria-label="参加者用の URL" />
+            <button type="button" class="button" id="copy">コピー</button>
+          </div>
+          <p class="hint"><a id="overlay-link" target="_blank" rel="noopener">プロジェクター・OBS 用の表示</a>を開くと、背景が透明な字幕になります。</p>
+          <p class="hint"><span id="viewers">0</span> 人が字幕を見ています。</p>
+        </section>
+
+        <section class="group">
+          <h2>計測</h2>
+          <dl class="stats">
+            <div><dt>話し終わりから確定まで</dt><dd id="stat-finalize">–</dd></div>
+            <div><dt>音声に対する確定の遅れ</dt><dd id="stat-lag">–</dd></div>
+            <div><dt>確定した発話</dt><dd id="stat-count">0</dd></div>
+            <div><dt>送った音声</dt><dd id="stat-audio">0:00</dd></div>
+          </dl>
+          <p class="hint">字幕を書き出す: <a id="export-md" target="_blank">Markdown</a>・<a id="export-vtt" target="_blank">WebVTT</a>・<a id="export-json" target="_blank">JSON</a></p>
+        </section>
+      </aside>
+
+      <section class="panel preview" aria-label="字幕のプレビュー">
+        <div class="caption-stage" id="stage">
+          <p class="caption-empty" id="empty">「配信を始める」を押して話すと、参加者と同じ字幕がここに出ます。</p>
+        </div>
+        <button type="button" class="jump" id="jump" hidden>最新の字幕へ</button>
+      </section>
+    </div>
+
+    <section class="panel talks" aria-labelledby="talks-heading">
+      <div class="talks-head">
+        <h2 id="talks-heading">登壇の記録</h2>
+        <p class="hint">「配信を始める」から「止める」までが 1 回の登壇です。録音した登壇は、終了後に AmiVoice の非同期 API で認識し直してアーカイブ字幕を作り、話す速さ・フィラー・感情の起伏の振り返りをまとめます。</p>
+      </div>
+      <ol class="talk-list" id="talk-list"></ol>
+      <p class="hint" id="talks-empty">まだ登壇の記録はありません。</p>
+    </section>
+
+    <section class="panel dictionary" aria-labelledby="dict-heading">
+      <div class="dictionary-head">
+        <h2 id="dict-heading">辞書</h2>
+        <p class="hint">スライドの PDF か資料のテキストから、誤認識されやすい語と読みを Claude が抜き出します。表で直してから保存してください。配信中に保存すると、数秒で新しい辞書に切り替わります。</p>
+      </div>
+      <div class="dictionary-input">
+        <label class="field">
+          <span>スライドの PDF</span>
+          <input type="file" id="pdf" accept="application/pdf" />
+        </label>
+        <label class="field grow">
+          <span>または資料のテキスト</span>
+          <textarea id="source-text" rows="3" placeholder="登壇の概要やスライドの文字を貼り付け"></textarea>
+        </label>
+        <button type="button" class="button" id="extract">語を抜き出す</button>
+      </div>
+      <p class="status" id="dict-status" role="status"></p>
+      <div class="table-wrap">
+        <table class="terms">
+          <thead>
+            <tr><th scope="col">表記</th><th scope="col">読み（かなで。複数は「、」区切り）</th><th scope="col">出現箇所</th><th scope="col"><span class="visually-hidden">操作</span></th></tr>
+          </thead>
+          <tbody id="terms-body"></tbody>
+        </table>
+      </div>
+      <div class="dictionary-actions">
+        <button type="button" class="button" id="add-term">語を追加</button>
+        <button type="button" class="button primary" id="save-dict">辞書を保存</button>
+      </div>
+    </section>
+
+    <script type="module" src="/src/client/speaker.ts"></script>
+  </body>
+</html>

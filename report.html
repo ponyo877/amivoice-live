@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登壇の振り返り | amivoice-live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/client/styles.css" />
+  </head>
+  <body class="console report">
+    <header class="console-bar">
+      <a class="wordmark" href="/">amivoice-live</a>
+      <h1 class="console-title" id="title">読み込み中…</h1>
+      <span class="report-when" id="when"></span>
+    </header>
+
+    <main class="report-main">
+      <p class="report-progress" id="progress" role="status" hidden></p>
+
+      <section class="figures" id="figures" aria-label="登壇のまとめ" hidden>
+        <div class="figure">
+          <span class="figure-label">話す速さ</span>
+          <span class="figure-value" id="fig-rate">–</span>
+          <span class="figure-note">話している時間 1 分あたりの文字数（フィラーを除く）</span>
+        </div>
+        <div class="figure">
+          <span class="figure-label">フィラー（「えー」「あのー」など）</span>
+          <span class="figure-value" id="fig-fillers">–</span>
+          <span class="figure-note" id="fig-fillers-note"></span>
+        </div>
+        <div class="figure">
+          <span class="figure-label">ライブ字幕とアーカイブの食い違い</span>
+          <span class="figure-value" id="fig-cer">–</span>
+          <span class="figure-note">アーカイブを正解とみなした文字の誤り率</span>
+        </div>
+        <div class="figure" id="fig-speakers-box" hidden>
+          <span class="figure-label">話した時間の割合</span>
+          <div class="share-bar" id="fig-speakers" role="img"></div>
+          <div class="share-legend" id="fig-speakers-legend"></div>
+        </div>
+      </section>
+
+      <section class="panel timeline-panel" id="timeline-panel" aria-labelledby="timeline-heading" hidden>
+        <div class="panel-head">
+          <h2 id="timeline-heading">登壇の流れ</h2>
+          <p class="hint">グラフをなぞると、その時刻の値が出ます。クリックすると、書き起こしのその時刻に移ります。</p>
+        </div>
+        <div class="timeline" id="timeline" tabindex="0" aria-describedby="timeline-help">
+          <div class="track" id="track-speakers" hidden>
+            <span class="track-label">話者</span>
+            <svg class="track-svg" id="svg-speakers" aria-hidden="true"></svg>
+          </div>
+          <div class="track">
+            <span class="track-label">話す速さ<small>文字/分・30 秒ごと</small></span>
+            <svg class="track-svg tall" id="svg-rate" aria-hidden="true"></svg>
+          </div>
+          <div class="track" id="track-sentiment" hidden>
+            <label class="track-label" for="sentiment-key">
+              感情
+              <select id="sentiment-key"></select>
+            </label>
+            <svg class="track-svg tall" id="svg-sentiment" aria-hidden="true"></svg>
+          </div>
+          <div class="track">
+            <span class="track-label">フィラー</span>
+            <svg class="track-svg" id="svg-fillers" aria-hidden="true"></svg>
+          </div>
+          <svg class="track-axis" id="svg-axis" aria-hidden="true"></svg>
+          <div class="tooltip" id="tooltip" hidden></div>
+        </div>
+        <p class="visually-hidden" id="timeline-help">左右の矢印キーで 5 秒ずつ動かし、Enter で書き起こしのその時刻に移ります。</p>
+        <p class="hint" id="sentiment-note" hidden></p>
+        <details class="table-view">
+          <summary>表で見る</summary>
+          <div class="table-wrap">
+            <table class="data-table" id="timeline-table"></table>
+          </div>
+        </details>
+      </section>
+
+      <div class="report-columns">
+        <section class="panel transcript-panel" aria-labelledby="transcript-heading">
+          <div class="panel-head">
+            <h2 id="transcript-heading">書き起こし</h2>
+            <div class="segmented" role="radiogroup" aria-label="表示する字幕">
+              <label><input type="radio" name="source" value="archive" checked /> アーカイブ</label>
+              <label><input type="radio" name="source" value="live" /> ライブ</label>
+            </div>
+          </div>
+          <div class="audio-row">
+            <button type="button" class="button small" id="load-audio" hidden>録音を聞く</button>
+            <audio id="audio" controls preload="none" hidden></audio>
+          </div>
+          <ol class="transcript" id="transcript"></ol>
+          <p class="hint" id="transcript-empty" hidden></p>
+          <p class="hint">
+            書き出す:
+            <a id="dl-archive-vtt" target="_blank">アーカイブ（WebVTT）</a>・<a id="dl-archive-md" target="_blank">アーカイブ（Markdown）</a>・<a id="dl-live-md" target="_blank">ライブ（Markdown）</a>
+          </p>
+        </section>
+
+        <section class="panel suggest-panel" aria-labelledby="suggest-heading">
+          <div class="panel-head">
+            <h2 id="suggest-heading">次の登壇に向けた辞書</h2>
+            <p class="hint">認識エンジンが自信を持てなかった語と前後の文脈を Claude に渡し、辞書に足すべき語と読みを提案してもらいます。</p>
+          </div>
+          <button type="button" class="button primary" id="suggest">辞書の候補を出す</button>
+          <p class="status" id="suggest-status" role="status"></p>
+          <ul class="suggestions" id="suggestions"></ul>
+          <button type="button" class="button" id="add-suggestions" hidden>選んだ語を辞書に追加</button>
+          <details class="unsure-list" id="unsure-details" hidden>
+            <summary>自信のない語（<span id="unsure-count">0</span>）</summary>
+            <ul id="unsure-list"></ul>
+          </details>
+        </section>
+      </div>
+
+      <section class="report-actions" aria-label="登壇の操作">
+        <button type="button" class="button" id="retry" hidden>アーカイブと振り返りを作り直す</button>
+        <button type="button" class="button" id="delete-recording" hidden>録音を削除する</button>
+        <p class="status" id="action-status" role="status"></p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/client/report.ts"></script>
+  </body>
+</html>

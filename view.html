@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1b2033" />
+    <title>字幕 | amivoice-live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/client/styles.css" />
+  </head>
+  <body class="viewer">
+    <header class="viewer-bar">
+      <span class="tally" id="tally" data-live="false">
+        <span class="tally-dot" aria-hidden="true"></span>
+        <span id="tally-text">待機中</span>
+      </span>
+      <span class="recording" id="recording" hidden title="アーカイブ字幕を作るため、この登壇の音声を録音しています">録音中</span>
+      <h1 class="viewer-title" id="title">字幕</h1>
+      <div class="viewer-tools">
+        <button type="button" class="tool" id="smaller" aria-label="文字を小さくする">A<small>−</small></button>
+        <button type="button" class="tool" id="larger" aria-label="文字を大きくする">A<small>＋</small></button>
+        <button type="button" class="tool" id="theme" aria-label="明るい表示に切り替える">◐</button>
+      </div>
+    </header>
+
+    <main class="caption-stage" id="stage">
+      <p class="caption-empty" id="empty">登壇が始まると、ここに字幕が流れます。</p>
+    </main>
+    <button type="button" class="jump" id="jump" hidden>最新の字幕へ</button>
+    <p class="legend" id="legend" hidden></p>
+
+    <p class="connection" id="connection" hidden></p>
+    <script type="module" src="/src/client/view.ts"></script>
+  </body>
+</html>
