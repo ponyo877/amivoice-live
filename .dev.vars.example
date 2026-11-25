@@ -1,0 +1,15 @@
+# cp .dev.vars.example .dev.vars して値を入れる（.dev.vars は git に入らない）
+
+# AmiVoice API のマイページで確認できる API キー（旧 APPKEY）
+AMIVOICE_API_KEY=
+
+# スライドから辞書を作るときに使う Claude API のキー
+ANTHROPIC_API_KEY=
+
+# 公開環境でルームを作るときの合言葉。ローカル（localhost）では未設定でも作れる
+ADMIN_PASSPHRASE=
+
+# AmiVoice の代わりにモックサーバ（npm run mock）につなぐときはコメントを外す
+# AMIVOICE_WS_URL=http://localhost:9900/
+# AMIVOICE_ASYNC_URL=http://localhost:9900/v2/recognitions
+# AMIVOICE_SENTIMENT_PARAMS_URL=http://localhost:9900/v2/sentiment-analysis/ja/result-parameters.json

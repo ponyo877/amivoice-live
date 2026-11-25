@@ -1,0 +1,39 @@
+{
+  "name": "amivoice-live",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "勉強会・LT会向けリアルタイム字幕。スライドから技術用語辞書を自動生成して AmiVoice API に渡す",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "npm run build && vite preview",
+    "deploy": "npm run build && wrangler deploy",
+    "typecheck": "tsc -p tsconfig.worker.json && tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
+    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts",
+    "mock": "node scripts/mock-amivoice.ts",
+    "test": "node --test test/*.test.ts",
+    "eval:stream": "node eval/stream.ts",
+    "eval:score": "node eval/score.ts",
+    "eval:async": "node eval/async.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.70.2",
+    "@types/node": "^26.6.10",
+    "@types/qrcode": "^1.5.6",
+    "@types/ws": "^8.18.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "wrangler": "^4.168.0",
+    "ws": "^8.23.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "qrcode": "^1.5.4",
+    "zod": "^4.6.7"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261123.1": true
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "amivoice-live",
+  "main": "./src/worker/index.ts",
+  "compatibility_date": "2026-11-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ROOM", "class_name": "Room" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }],
+  // 登壇の録音（終了後に非同期 HTTP API で認識し直すため）。作成: npx wrangler r2 bucket create amivoice-live-recordings
+  "r2_buckets": [{ "binding": "RECORDINGS", "bucket_name": "amivoice-live-recordings" }],
+  "vars": {
+    // ログ保存なしのエンドポイント（末尾の / が必要）。モックで試すときは .dev.vars で上書きする
+    "AMIVOICE_WS_URL": "https://acp-api.amivoice.com/v1/nolog/",
+    // 非同期 HTTP API（v1 は 2026 年末に停止予定なので v2 を使う）。ログを残さない指定は d の loggingOptOut=True で行う
+    "AMIVOICE_ASYNC_URL": "https://acp-api-async.amivoice.com/v2/recognitions",
+    // 感情分析の 20 個のパラメータの名前一覧
+    "AMIVOICE_SENTIMENT_PARAMS_URL": "https://acp-dsrpp.amivoice.com/v2/sentiment-analysis/ja/result-parameters.json"
+  },
+  "observability": { "enabled": true },
+  "upload_source_maps": true
+}
