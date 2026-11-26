@@ -9,7 +9,7 @@
 // 実行のたびに eval/budget.ts の台帳に使用量を記録し、クーポンの範囲を超えるなら始めない。
 // 出力は eval/out/<音声>.<エンジン>.<辞書>[.spk][.sa][.filler].async.json（{ header, result }）。
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { parseArgs } from "node:util";
 import { buildProfileWords, engineKind, type DictionaryTerm } from "../src/shared/amivoice.ts";
@@ -75,6 +75,7 @@ async function main(): Promise<void> {
       parallel: { type: "string", default: "4" },
       url: { type: "string" },
       "dry-run": { type: "boolean", default: false },
+      "skip-existing": { type: "boolean", default: false },
     },
   });
   const apiKey = process.env.AMIVOICE_API_KEY;
@@ -91,11 +92,16 @@ async function main(): Promise<void> {
   const outDir = join(dirname(values.audio), "..", "out");
   const engines = values.engine?.length ? values.engine : values.matrix ? ["-a2b-ja-general", "-a-general"] : ["-a2b-ja-general"];
   const dictRuns = values.matrix || values.baseline || dictionaries.length === 0 ? [null, ...dictionaries] : dictionaries;
-  const runs = engines.flatMap((engine) => dictRuns.map((dict) => ({ engine, dict })));
   const extra: Record<string, string> = {};
   if (values.sentiment) extra.sentimentAnalysis = "True";
   if (values.filler) extra.keepFillerToken = "1";
   const suffix = [values.diarization ? "spk" : "", values.sentiment ? "sa" : "", values.filler ? "filler" : ""].filter(Boolean).join(".");
+  const outPath = (engine: string, dict: { label: string } | null) =>
+    join(outDir, `${stem}.${engine.replace(/^-/, "")}.${dict?.label ?? "nodict"}${suffix ? `.${suffix}` : ""}.async.json`);
+  const runs = engines
+    .flatMap((engine) => dictRuns.map((dict) => ({ engine, dict, out: outPath(engine, dict) })))
+    // --skip-existing: 結果がすでにある組み合わせは飛ばす（途中で止まったバッチの続きを流すとき）
+    .filter((run) => !(values["skip-existing"] && existsSync(run.out)));
 
   const counted = !isMockUrl(values.url);
   console.log(
@@ -105,20 +111,30 @@ async function main(): Promise<void> {
   if (values["dry-run"]) return;
 
   const queue = [...runs];
+  const failures: string[] = [];
   const worker = async () => {
     for (let run = queue.shift(); run; run = queue.shift()) {
       const label = `${run.engine} ${run.dict ? `辞書=${run.dict.label}` : "辞書なし"}${suffix ? ` ${suffix}` : ""}`;
       if (counted) reserve({ api: "async", engine: run.engine, seconds: audioSeconds, sentiment: values.sentiment, label: `async ${stem} ${label}` });
-      const { result, elapsedMs } = await recognizeAsync({
-        apiKey: apiKey!,
-        url: values.url,
-        pcm,
-        engine: run.engine,
-        terms: run.dict?.terms ?? null,
-        diarization: values.diarization,
-        extra,
-      });
-      const out = join(outDir, `${stem}.${run.engine.replace(/^-/, "")}.${run.dict?.label ?? "nodict"}${suffix ? `.${suffix}` : ""}.async.json`);
+      let done: Awaited<ReturnType<typeof recognizeAsync>>;
+      try {
+        done = await recognizeAsync({
+          apiKey: apiKey!,
+          url: values.url,
+          pcm,
+          engine: run.engine,
+          terms: run.dict?.terms ?? null,
+          diarization: values.diarization,
+          extra,
+        });
+      } catch (err) {
+        // 1 つ失敗しても残りは流す（台帳には記録済みなので、やり直すときは --skip-existing で続きから）
+        console.error(`- ${label}: ${err instanceof Error ? err.message : err}`);
+        failures.push(label);
+        continue;
+      }
+      const { result, elapsedMs } = done;
+      const out = run.out;
       mkdirSync(dirname(out), { recursive: true });
       const header = {
         kind: "async",
@@ -137,6 +153,7 @@ async function main(): Promise<void> {
     }
   };
   await Promise.all(Array.from({ length: Math.max(1, Number(values.parallel)) }, worker));
+  if (failures.length) throw new Error(`${failures.length} 通りが失敗しました: ${failures.join("、")}`);
 }
 
 if (import.meta.main) {
