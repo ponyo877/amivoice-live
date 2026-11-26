@@ -1,11 +1,13 @@
 // 音声ファイルを AmiVoice の非同期 HTTP API（v2）で認識し、結果を保存する。
 // 終了後に作るアーカイブ字幕と同じ条件で、ライブ（WebSocket）とどれだけ精度が違うかを score.ts で比べるためのもの。
 //
-//   AMIVOICE_API_KEY=... node eval/async.ts --audio eval/data/talk1.wav \
-//     [--engine -a2b-ja-general] [--dictionary eval/data/talk1.dict.json] [--diarization] [--url http://localhost:9900/v2/recognitions]
+//   AMIVOICE_API_KEY=... node eval/async.ts --audio eval/data/rag.wav \
+//     --engine=-a2b-ja-general --dictionary eval/data/rag.slides.dict.json --baseline --diarization
 //
-// --matrix を付けると、バッチ用 E2E（-a2b-ja-general）とハイブリッド（-a-general）× 辞書あり/なし を順に実行する。
-// 出力は eval/out/<音声>.<エンジン>.<dict|nodict>.async.json（{ header, result }）。
+// --engine と --dictionary は何度でも指定できる（stream.ts と同じ）。--matrix はバッチ用 E2E とハイブリッド × （辞書なし＋指定した辞書）。
+// --sentiment で感情分析、--filler でフィラーを残す（ハイブリッドエンジンのみ）。
+// 実行のたびに eval/budget.ts の台帳に使用量を記録し、クーポンの範囲を超えるなら始めない。
+// 出力は eval/out/<音声>.<エンジン>.<辞書>[.spk][.sa][.filler].async.json（{ header, result }）。
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -13,7 +15,9 @@ import { parseArgs } from "node:util";
 import { buildProfileWords, engineKind, type DictionaryTerm } from "../src/shared/amivoice.ts";
 import { buildDParam, wavHeader } from "../src/shared/async-request.ts";
 import type { AsyncJobResult } from "../src/shared/async-result.ts";
+import { fmt, isMockUrl, monthlyUsage, reserve } from "./budget.ts";
 import { toPcm16k } from "./lib.ts";
+import { dictionaryLabel } from "./stream.ts";
 
 const DEFAULT_URL = "https://acp-api-async.amivoice.com/v2/recognitions";
 const POLL_MS = 10_000;
@@ -61,43 +65,78 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       audio: { type: "string" },
-      engine: { type: "string", default: "-a2b-ja-general" },
-      dictionary: { type: "string" },
+      engine: { type: "string", multiple: true },
+      dictionary: { type: "string", multiple: true },
+      baseline: { type: "boolean", default: false },
       diarization: { type: "boolean", default: false },
+      sentiment: { type: "boolean", default: false },
+      filler: { type: "boolean", default: false },
       matrix: { type: "boolean", default: false },
+      parallel: { type: "string", default: "4" },
       url: { type: "string" },
+      "dry-run": { type: "boolean", default: false },
     },
   });
   const apiKey = process.env.AMIVOICE_API_KEY;
-  if (!apiKey) throw new Error("環境変数 AMIVOICE_API_KEY を設定してください");
+  if (!apiKey && !values["dry-run"]) throw new Error("環境変数 AMIVOICE_API_KEY を設定してください");
   if (!values.audio) throw new Error("--audio を指定してください");
 
   const pcm = toPcm16k(values.audio);
-  const terms = values.dictionary ? (JSON.parse(readFileSync(values.dictionary, "utf8")) as { terms: DictionaryTerm[] }).terms : null;
+  const audioSeconds = pcm.length / 32000;
+  const dictionaries = (values.dictionary ?? []).map((path) => ({
+    label: dictionaryLabel(path),
+    terms: (JSON.parse(readFileSync(path, "utf8")) as { terms: DictionaryTerm[] }).terms,
+  }));
   const stem = basename(values.audio).replace(/\.[^.]+$/, "");
   const outDir = join(dirname(values.audio), "..", "out");
-  const engines = values.matrix ? ["-a2b-ja-general", "-a-general"] : [values.engine!];
-  const runs = engines.flatMap((engine) => (values.matrix && terms ? [null, terms] : [terms]).map((t) => ({ engine, terms: t })));
+  const engines = values.engine?.length ? values.engine : values.matrix ? ["-a2b-ja-general", "-a-general"] : ["-a2b-ja-general"];
+  const dictRuns = values.matrix || values.baseline || dictionaries.length === 0 ? [null, ...dictionaries] : dictionaries;
+  const runs = engines.flatMap((engine) => dictRuns.map((dict) => ({ engine, dict })));
+  const extra: Record<string, string> = {};
+  if (values.sentiment) extra.sentimentAnalysis = "True";
+  if (values.filler) extra.keepFillerToken = "1";
+  const suffix = [values.diarization ? "spk" : "", values.sentiment ? "sa" : "", values.filler ? "filler" : ""].filter(Boolean).join(".");
 
-  console.log(`音声: ${values.audio}（${(pcm.length / 32000).toFixed(1)} 秒）× ${runs.length} 通り（非同期 HTTP API）`);
-  for (const run of runs) {
-    process.stdout.write(`- ${run.engine} 辞書${run.terms ? "あり" : "なし"} `);
-    const { result, elapsedMs } = await recognizeAsync({ apiKey, url: values.url, pcm, engine: run.engine, terms: run.terms, diarization: values.diarization });
-    const out = join(outDir, `${stem}.${run.engine.replace(/^-/, "")}.${run.terms ? "dict" : "nodict"}.async.json`);
-    mkdirSync(dirname(out), { recursive: true });
-    const header = {
-      kind: "async",
-      engine: run.engine,
-      dictionary: run.terms !== null,
-      diarization: values.diarization,
-      audio: values.audio,
-      audioMs: (pcm.length / 32000) * 1000,
-      elapsedMs,
-      at: new Date().toISOString(),
-    };
-    writeFileSync(out, JSON.stringify({ header, result }, null, 1));
-    console.log(` ${(elapsedMs / 1000).toFixed(0)} 秒で完了 → ${out}`);
-  }
+  const counted = !isMockUrl(values.url);
+  console.log(
+    `音声: ${values.audio}（${audioSeconds.toFixed(1)} 秒）× ${runs.length} 通り（非同期 HTTP API）` +
+      (counted ? `。AmiVoice の使用量 ${fmt(audioSeconds * runs.length)}（この月の使用済み ${fmt(monthlyUsage().seconds)}）` : "（モックなので使用量に数えない）"),
+  );
+  if (values["dry-run"]) return;
+
+  const queue = [...runs];
+  const worker = async () => {
+    for (let run = queue.shift(); run; run = queue.shift()) {
+      const label = `${run.engine} ${run.dict ? `辞書=${run.dict.label}` : "辞書なし"}${suffix ? ` ${suffix}` : ""}`;
+      if (counted) reserve({ api: "async", engine: run.engine, seconds: audioSeconds, sentiment: values.sentiment, label: `async ${stem} ${label}` });
+      const { result, elapsedMs } = await recognizeAsync({
+        apiKey: apiKey!,
+        url: values.url,
+        pcm,
+        engine: run.engine,
+        terms: run.dict?.terms ?? null,
+        diarization: values.diarization,
+        extra,
+      });
+      const out = join(outDir, `${stem}.${run.engine.replace(/^-/, "")}.${run.dict?.label ?? "nodict"}${suffix ? `.${suffix}` : ""}.async.json`);
+      mkdirSync(dirname(out), { recursive: true });
+      const header = {
+        kind: "async",
+        engine: run.engine,
+        dictionary: run.dict?.label ?? null,
+        diarization: values.diarization,
+        sentiment: values.sentiment,
+        filler: values.filler,
+        audio: values.audio,
+        audioMs: audioSeconds * 1000,
+        elapsedMs,
+        at: new Date().toISOString(),
+      };
+      writeFileSync(out, JSON.stringify({ header, result }, null, 1));
+      console.log(`- ${label}: ${(elapsedMs / 1000).toFixed(0)} 秒で完了 → ${out}`);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Number(values.parallel)) }, worker));
 }
 
 if (import.meta.main) {

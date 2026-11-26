@@ -2,12 +2,18 @@
 // → （録音したとき）終了後のアーカイブと振り返り までを通しで確かめる。
 //
 //   node scripts/smoke.ts --audio sample.wav [--base http://localhost:5173] [--engine -a-general] [--no-dictionary]
-//                         [--diarization] [--no-archive] [--speed 1]
+//                         [--dictionary eval/data/rag.slides.dict.json] [--title タイトル]
+//                         [--diarization] [--no-archive] [--speed 1] [--mock]
 //
 // 音声は ffmpeg で 16kHz モノラル PCM に変換してから、実時間（--speed 倍）で流す。
+// 本物の AmiVoice につないだアプリに流すときは、eval/budget.ts の台帳に使用量を記録する
+// （ライブ + 録音から作り直す 2 本 + 感情分析）。モックにつないだアプリなら --mock を付けて記録しない。
 
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
 import { parseArgs } from "node:util";
+import { reserve } from "../eval/budget.ts";
 
 const { values } = parseArgs({
   options: {
@@ -19,6 +25,9 @@ const { values } = parseArgs({
     "no-archive": { type: "boolean", default: false },
     speed: { type: "string", default: "1" },
     passphrase: { type: "string", default: "" },
+    dictionary: { type: "string" },
+    title: { type: "string", default: "スモークテスト" },
+    mock: { type: "boolean", default: false },
   },
 });
 
@@ -52,14 +61,23 @@ function open(url: string, label: string, onMessage: (msg: { type: string; [k: s
 }
 
 const pcm = toPcm(values.audio);
-console.log(`音声: ${(pcm.length / 32000).toFixed(1)} 秒`);
+const audioSeconds = pcm.length / 32000;
+console.log(`音声: ${audioSeconds.toFixed(1)} 秒`);
+if (!values.mock) {
+  const label = `smoke ${basename(values.audio)}`;
+  reserve({ api: "websocket", engine: values.engine!, seconds: audioSeconds, label });
+  if (!values["no-archive"]) {
+    reserve({ api: "async", engine: "-a2b-ja-general", seconds: audioSeconds, label: `${label} アーカイブ` });
+    reserve({ api: "async", engine: "-a-general", seconds: audioSeconds, sentiment: true, label: `${label} 振り返り` });
+  }
+}
 
 // 1. ルームを作る
 const created = (await (
   await fetch(`${base}/api/rooms`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ title: "スモークテスト", passphrase: values.passphrase }),
+    body: JSON.stringify({ title: values.title, passphrase: values.passphrase }),
   })
 ).json()) as { roomId?: string; token?: string; error?: string };
 if (!created.roomId || !created.token) throw new Error(`ルームを作れませんでした: ${created.error}`);
@@ -71,7 +89,7 @@ const dict = await fetch(`${base}/api/rooms/${roomId}/dictionary`, {
   method: "PUT",
   headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
   body: JSON.stringify({
-    terms: [
+    terms: values.dictionary ? (JSON.parse(readFileSync(values.dictionary, "utf8")) as { terms: unknown[] }).terms : [
       { written: "Durable Objects", readings: ["でゅらぶるおぶじぇくつ"] },
       { written: "WebSocket", readings: ["うぇぶそけっと"] },
       { written: "Hibernation", readings: ["はいばねーしょん"] },
@@ -105,6 +123,10 @@ const speaker = await open(`${wsBase}/api/rooms/${roomId}/ws?role=speaker&token=
   }
   if (msg.type === "stats") console.log(`  [計測] ${JSON.stringify(msg.stats)}`);
   if (msg.type === "talks") talks = msg.talks as typeof talks;
+  if (msg.type === "usage") {
+    const u = msg.usage as { seconds: number; limitSeconds: number | null; sentimentSeconds: number };
+    console.log(`  [今月の使用量] ${Math.round(u.seconds)} 秒 / 上限 ${u.limitSeconds === null ? "なし" : `${u.limitSeconds} 秒`}（感情分析 ${Math.round(u.sentimentSeconds)} 秒）`);
+  }
 });
 let talks: { id: number; status: string; error: string | null; reportReady: boolean }[] = [];
 speaker.send(
