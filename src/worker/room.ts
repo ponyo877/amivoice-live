@@ -570,6 +570,7 @@ export class Room extends DurableObject<Env> {
         this.sendToSpeaker({ type: "talks", talks: this.talkSummaries() });
         return;
       }
+      this.reportUsage(r.status);
       const recording = await this.env.RECORDINGS.get(row.r2_key!);
       if (!recording) throw new Error("録音が見つかりません");
       const d = buildDParam({
@@ -597,6 +598,7 @@ export class Room extends DurableObject<Env> {
         );
         return;
       }
+      this.reportUsage(r.status);
       const recording = await this.env.RECORDINGS.get(row.r2_key!);
       if (!recording) throw new Error("録音が見つかりません");
       const d = buildDParam({
@@ -1017,6 +1019,12 @@ export class Room extends DurableObject<Env> {
         }
       })().catch((err) => console.error("使用量を記録できませんでした", errorMessage(err))),
     );
+  }
+
+  /** 使用量が変わったら、登壇者の画面の表示を更新する */
+  private reportUsage(status: UsageStatus): void {
+    this.usageStatus = status;
+    this.sendToSpeaker({ type: "usage", usage: status });
   }
 
   private async refreshUsage(): Promise<void> {
