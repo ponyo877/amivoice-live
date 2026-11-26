@@ -160,6 +160,18 @@ node eval/summarize.ts --json eval/results/summary.json
 
 `eval/sample/make-audio.sh` で、手順を試すためのサンプル音声を macOS の読み上げで作れます。
 
+### 正解のない録音で比べる
+
+自分の登壇の録音のように正解の書き起こしがない音声でも、辞書なしと辞書ありの字幕を並べて比べられます。スライドが手元になければ、登壇者が同じ内容を書いた Zenn の記事やテキストから辞書を作れます。
+
+```sh
+# Zenn の記事（URL）やテキストファイルから、アプリと同じ処理で辞書を作る（同じ読みの語があれば知らせる）
+ANTHROPIC_API_KEY=... node eval/text-dictionary.ts eval/data/talk.zenn.dict.json https://zenn.dev/<user>/articles/<slug>
+AMIVOICE_API_KEY=... node eval/stream.ts --audio eval/data/talk.wav --engine=-a-general --dictionary eval/data/talk.zenn.dict.json --baseline
+# 辞書の語が字幕に出た回数と、同じ時刻の字幕で違いのある箇所を並べる
+node eval/compare.ts eval/data/talk.zenn.dict.json eval/out/talk.a-general.nodict.jsonl eval/out/talk.a-general.zenn.jsonl
+```
+
 ## 開発
 
 ```sh
