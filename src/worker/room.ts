@@ -47,8 +47,11 @@ const MAX_RECONNECTS_PER_MINUTE = 5;
 /** 非同期ジョブの状態を見に行く間隔（公式サンプルも 10 秒） */
 const POLL_MS = 10_000;
 const MAX_ATTEMPTS = 5;
-/** アーカイブ用: 非同期 HTTP ではバッチ用エンジンが推奨されている */
-const ARCHIVE_ENGINE = "-a2b-ja-general";
+/**
+ * アーカイブ用。非同期 HTTP ではバッチ用 E2E（-a2b-ja-general）が推奨されているが、模擬 LT の評価では、
+ * スライドから作った辞書を入れたときの用語の再現率がハイブリッドのほうがずっと高かった（読みで照合できるため）。
+ */
+const ARCHIVE_ENGINE = "-a-general";
 /** 振り返り用: フィラーを残せる（keepFillerToken）のはハイブリッドエンジンだけ */
 const REPORT_ENGINE = "-a-general";
 /** 配信中の使用量は、送った音声がこの長さ（60 秒）たまるごとに数える */
@@ -577,7 +580,7 @@ export class Room extends DurableObject<Env> {
         grammarFileNames: ARCHIVE_ENGINE,
         speakerDiarization: "True",
         loggingOptOut: "True",
-        profileWords: useDictionary ? buildProfileWords(terms, "e2e") : undefined,
+        profileWords: useDictionary ? buildProfileWords(terms, "hybrid") : undefined,
       });
       const job = await submitRecording(this.env, recording, d);
       this.ctx.storage.sql.exec("UPDATE talks SET archive_job = ?, archive_state = 'pending' WHERE id = ?", job, row.id);

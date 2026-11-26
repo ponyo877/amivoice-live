@@ -67,7 +67,7 @@ if (!values.mock) {
   const label = `smoke ${basename(values.audio)}`;
   reserve({ api: "websocket", engine: values.engine!, seconds: audioSeconds, label });
   if (!values["no-archive"]) {
-    reserve({ api: "async", engine: "-a2b-ja-general", seconds: audioSeconds, label: `${label} アーカイブ` });
+    reserve({ api: "async", engine: "-a-general", seconds: audioSeconds, label: `${label} アーカイブ` });
     reserve({ api: "async", engine: "-a-general", seconds: audioSeconds, sentiment: true, label: `${label} 振り返り` });
   }
 }
