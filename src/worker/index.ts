@@ -6,6 +6,7 @@ import type { CaptionLine } from "../shared/protocol.ts";
 import { wavHeader } from "../shared/async-request.ts";
 
 export { Room } from "./room.ts";
+export { UsageMeter } from "./usage.ts";
 
 const MAX_PDF_BYTES = 30 * 1024 * 1024;
 

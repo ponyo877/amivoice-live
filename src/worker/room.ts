@@ -34,6 +34,7 @@ import type {
   TalkDetail,
   TalkStatus,
   TalkSummary,
+  UsageStatus,
 } from "../shared/protocol.ts";
 import { buildDParam } from "../shared/async-request.ts";
 import { getJob, getSentimentParameters, submitRecording } from "./async-api.ts";
@@ -50,6 +51,9 @@ const MAX_ATTEMPTS = 5;
 const ARCHIVE_ENGINE = "-a2b-ja-general";
 /** 振り返り用: フィラーを残せる（keepFillerToken）のはハイブリッドエンジンだけ */
 const REPORT_ENGINE = "-a-general";
+/** 配信中の使用量は、送った音声がこの長さ（60 秒）たまるごとに数える */
+const USAGE_REPORT_BYTES = 16000 * 2 * 60;
+const PCM_BYTES_PER_SECOND = 16000 * 2;
 
 interface LiveConfig {
   engine: string;
@@ -113,6 +117,10 @@ export class Room extends DurableObject<Env> {
   private finalizeSamples: number[] = [];
   private lagSamples: number[] = [];
   private reconnectTimes: number[] = [];
+  /** AmiVoice に送ったが、まだ使用量に数えていない音声のバイト数 */
+  private unreportedBytes = 0;
+  /** 最後に見た今月の使用量。配信を始めるときの判定に使う（同期的に判定したいので手元に持つ） */
+  private usageStatus: UsageStatus | null = null;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -324,6 +332,7 @@ export class Room extends DurableObject<Env> {
     if (role === "speaker") {
       server.send(JSON.stringify({ type: "stats", stats: this.stats() } satisfies ServerMessage));
       server.send(JSON.stringify({ type: "talks", talks: this.talkSummaries() } satisfies ServerMessage));
+      this.ctx.waitUntil(this.refreshUsage());
     }
     this.broadcast({ type: "viewers", count: this.ctx.getWebSockets("viewer").length });
 
@@ -394,6 +403,10 @@ export class Room extends DurableObject<Env> {
   // ------------------------------------------------------------------
 
   private async startLive(): Promise<void> {
+    if (!this.wantLive && this.usageStatus?.remainingSeconds != null && this.usageStatus.remainingSeconds <= 0) {
+      this.sendToSpeaker({ type: "upstream", state: "error", message: usageLimitMessage(this.usageStatus, "配信を始められません") });
+      return;
+    }
     if (!this.wantLive) {
       // 新しい登壇。音声が届き始める前に、同期的に状態を作っておく
       this.wantLive = true;
@@ -430,6 +443,7 @@ export class Room extends DurableObject<Env> {
 
   private stopLive(): void {
     if (!this.wantLive) return;
+    this.flushUsage();
     this.wantLive = false;
     this.pendingAudio = [];
     this.pendingBytes = 0;
@@ -546,7 +560,16 @@ export class Room extends DurableObject<Env> {
     // 辞書を使うかどうかはその登壇の設定に合わせる。語は今の辞書を使うので、振り返りで足した語は作り直しに効く
     const terms = this.loadTerms();
     const useDictionary = row.dictionary === 1;
+    const usage = this.env.USAGE.getByName("global");
+    const seconds = row.audio_bytes / PCM_BYTES_PER_SECOND;
     if (!row.archive_job) {
+      const r = await usage.reserve("async", ARCHIVE_ENGINE, seconds);
+      if (!r.ok) {
+        // アーカイブを作れないなら振り返りも作らない（使用量の上限に達している）
+        this.ctx.storage.sql.exec("UPDATE talks SET status = 'error', error = ? WHERE id = ?", usageLimitMessage(r.status, "アーカイブと振り返りを作りませんでした"), row.id);
+        this.sendToSpeaker({ type: "talks", talks: this.talkSummaries() });
+        return;
+      }
       const recording = await this.env.RECORDINGS.get(row.r2_key!);
       if (!recording) throw new Error("録音が見つかりません");
       const d = buildDParam({
@@ -559,11 +582,26 @@ export class Room extends DurableObject<Env> {
       this.ctx.storage.sql.exec("UPDATE talks SET archive_job = ?, archive_state = 'pending' WHERE id = ?", job, row.id);
     }
     if (!row.report_job) {
+      // 感情分析の枠が足りなければ、感情分析なしで振り返りを作る
+      let sentiment = true;
+      let r = await usage.reserve("async", REPORT_ENGINE, seconds, true);
+      if (!r.ok && r.reason === "sentiment") {
+        sentiment = false;
+        r = await usage.reserve("async", REPORT_ENGINE, seconds, false);
+      }
+      if (!r.ok) {
+        this.ctx.storage.sql.exec(
+          "UPDATE talks SET report_state = 'error', error = ?, status = 'archiving', attempts = 0 WHERE id = ?",
+          usageLimitMessage(r.status, "振り返りを作りませんでした"),
+          row.id,
+        );
+        return;
+      }
       const recording = await this.env.RECORDINGS.get(row.r2_key!);
       if (!recording) throw new Error("録音が見つかりません");
       const d = buildDParam({
         grammarFileNames: REPORT_ENGINE,
-        sentimentAnalysis: "True",
+        sentimentAnalysis: sentiment ? "True" : undefined,
         keepFillerToken: "1",
         loggingOptOut: "True",
         profileWords: useDictionary ? buildProfileWords(terms, "hybrid") : undefined,
@@ -878,6 +916,8 @@ export class Room extends DurableObject<Env> {
     try {
       this.upstream?.send(buildAudioPacket(chunk));
       this.sessionAudioBytes += chunk.byteLength;
+      this.unreportedBytes += chunk.byteLength;
+      if (this.unreportedBytes >= USAGE_REPORT_BYTES) this.flushUsage();
     } catch {
       this.closeUpstream();
     }
@@ -958,6 +998,34 @@ export class Room extends DurableObject<Env> {
       .exec<TalkRow>("SELECT * FROM talks ORDER BY id DESC LIMIT 50")
       .toArray()
       .map((r) => toTalkSummary(r, reported.has(r.id)));
+  }
+
+  /** 送った音声を使用量に数え、上限に達していたら配信を止める。 */
+  private flushUsage(): void {
+    const bytes = this.unreportedBytes;
+    if (bytes === 0) return;
+    this.unreportedBytes = 0;
+    const engine = this.config.engine;
+    this.ctx.waitUntil(
+      (async () => {
+        const status = await this.env.USAGE.getByName("global").add("websocket", engine, bytes / PCM_BYTES_PER_SECOND);
+        this.usageStatus = status;
+        this.sendToSpeaker({ type: "usage", usage: status });
+        if (this.wantLive && status.remainingSeconds !== null && status.remainingSeconds <= 0) {
+          this.sendToSpeaker({ type: "upstream", state: "error", message: usageLimitMessage(status, "配信を止めました") });
+          this.stopLive();
+        }
+      })().catch((err) => console.error("使用量を記録できませんでした", errorMessage(err))),
+    );
+  }
+
+  private async refreshUsage(): Promise<void> {
+    try {
+      this.usageStatus = await this.env.USAGE.getByName("global").status();
+      this.sendToSpeaker({ type: "usage", usage: this.usageStatus });
+    } catch (err) {
+      console.error("使用量を読めませんでした", errorMessage(err));
+    }
   }
 
   private setTalkStatus(talkId: number, status: TalkStatus): void {
@@ -1057,4 +1125,9 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+function usageLimitMessage(status: UsageStatus, what: string): string {
+  const hours = status.limitSeconds === null ? "" : `（${Math.round((status.limitSeconds / 3600) * 10) / 10} 時間）`;
+  return `今月の AmiVoice の使用量が上限${hours}に達したため、${what}。上限は AMIVOICE_MONTHLY_LIMIT_HOURS で変えられます`;
 }

@@ -2,7 +2,7 @@
 
 import QRCode from "qrcode";
 import { ENGINES, isValidReading, normalizeReading, type DictionaryTerm } from "../shared/amivoice.ts";
-import type { LiveStats, ServerMessage, TalkSummary } from "../shared/protocol.ts";
+import type { LiveStats, ServerMessage, TalkSummary, UsageStatus } from "../shared/protocol.ts";
 import { listMicrophones, startCapture, type AudioSourceKind, type Capture } from "./audio.ts";
 import { CaptionView } from "./captions.ts";
 import { LiveSocket, wsUrl } from "./socket.ts";
@@ -130,6 +130,9 @@ function handleMessage(msg: ServerMessage): void {
     case "talks":
       renderTalks(msg.talks);
       break;
+    case "usage":
+      renderUsage(msg.usage);
+      break;
     case "upstream":
       if (msg.state === "connecting") setStatus("AmiVoice に接続しています…");
       else if (msg.state === "open") setStatus("認識しています。話してください。");
@@ -211,6 +214,17 @@ function renderStats(s: LiveStats): void {
   $("stat-count").textContent = String(s.utterances);
   const sec = Math.floor(s.audioSentMs / 1000);
   $("stat-audio").textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+}
+
+/** 全部の勉強会を合わせた今月の使用量。録音から作り直す分（アーカイブと振り返りで音声の長さの 2 倍）も含む */
+function renderUsage(u: UsageStatus): void {
+  const fmt = (sec: number) => {
+    const m = Math.round(sec / 60);
+    return m >= 60 ? `${Math.floor(m / 60)} 時間 ${m % 60} 分` : `${m} 分`;
+  };
+  const el = $("stat-usage");
+  el.textContent = u.limitSeconds === null ? `${fmt(u.seconds)}（上限なし）` : `${fmt(u.seconds)} / ${fmt(u.limitSeconds)}`;
+  el.classList.toggle("is-warning", u.remainingSeconds !== null && u.remainingSeconds < 30 * 60);
 }
 
 // ---- 登壇の記録 ----

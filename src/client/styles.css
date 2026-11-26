@@ -672,6 +672,11 @@ body.console {
   font-variant-numeric: tabular-nums;
 }
 
+/* 今月の使用量が上限の 30 分前を切ったら目立たせる（色だけに頼らず、数字そのものが残りを示す） */
+.stats dd.is-warning {
+  color: var(--error);
+}
+
 .preview {
   position: relative;
   overflow: hidden;

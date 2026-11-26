@@ -8,9 +8,16 @@
     "run_worker_first": ["/api/*"]
   },
   "durable_objects": {
-    "bindings": [{ "name": "ROOM", "class_name": "Room" }]
+    "bindings": [
+      { "name": "ROOM", "class_name": "Room" },
+      // AmiVoice の月ごとの使用量を、全部の勉強会をまたいで数える（1 つだけ）
+      { "name": "USAGE", "class_name": "UsageMeter" }
+    ]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Room"] },
+    { "tag": "v2", "new_sqlite_classes": ["UsageMeter"] }
+  ],
   // 登壇の録音（終了後に非同期 HTTP API で認識し直すため）。作成: npx wrangler r2 bucket create amivoice-live-recordings
   "r2_buckets": [{ "binding": "RECORDINGS", "bucket_name": "amivoice-live-recordings" }],
   "vars": {
@@ -19,7 +26,12 @@
     // 非同期 HTTP API（v1 は 2026 年末に停止予定なので v2 を使う）。ログを残さない指定は d の loggingOptOut=True で行う
     "AMIVOICE_ASYNC_URL": "https://acp-api-async.amivoice.com/v2/recognitions",
     // 感情分析の 20 個のパラメータの名前一覧
-    "AMIVOICE_SENTIMENT_PARAMS_URL": "https://acp-dsrpp.amivoice.com/v2/sentiment-analysis/ja/result-parameters.json"
+    "AMIVOICE_SENTIMENT_PARAMS_URL": "https://acp-dsrpp.amivoice.com/v2/sentiment-analysis/ja/result-parameters.json",
+    // 月の使用量の上限（時間）。超えると配信を始めさせず、終了後のジョブも出さない。空にすると上限なし。
+    // 既定の 9 は、Zennfes のクーポン（月 10 時間）から 1 時間の余裕を引いた値
+    "AMIVOICE_MONTHLY_LIMIT_HOURS": "9",
+    // 感情分析の月の上限（分）。感情分析は音声認識とは別に課金される（無料枠は月 60 分）
+    "AMIVOICE_SENTIMENT_LIMIT_MINUTES": "55"
   },
   "observability": { "enabled": true },
   "upload_source_maps": true

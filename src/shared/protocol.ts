@@ -84,7 +84,18 @@ export type ServerMessage =
   | { type: "viewers"; count: number }
   | { type: "stats"; stats: LiveStats }
   | { type: "talks"; talks: TalkSummary[] }
+  | { type: "usage"; usage: UsageStatus }
   | { type: "upstream"; state: "connecting" | "open" | "closed" | "error"; message?: string };
+
+/** AmiVoice API の今月の使用量（全部の勉強会の合計）。秒。上限なしなら limitSeconds は null */
+export interface UsageStatus {
+  month: string;
+  seconds: number;
+  limitSeconds: number | null;
+  remainingSeconds: number | null;
+  sentimentSeconds: number;
+  sentimentLimitSeconds: number | null;
+}
 
 /** 登壇者クライアント → DO（音声はバイナリフレームで別送） */
 export type SpeakerMessage =
