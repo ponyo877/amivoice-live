@@ -149,7 +149,13 @@ interface TimelineData {
   durationMs: number;
   speakers: { s: number; e: number; speaker: number }[];
   rate: { t: number; cpm: number }[];
-  sentiment: { keys: string[]; labels: string[]; segments: { s: number; e: number; v: number[] }[] } | null;
+  sentiment: {
+    keys: string[];
+    labels: string[];
+    /** パラメータごとの値の範囲（AmiVoice のパラメータ一覧から）。取れなければ null でデータから決める */
+    ranges: ({ min: number; max: number } | null)[];
+    segments: { s: number; e: number; v: number[] }[];
+  } | null;
   fillers: number[];
 }
 
@@ -168,7 +174,9 @@ function renderTimeline(r: TalkReport, d: TalkDetail): void {
     durationMs,
     speakers: speakerLines.map((l) => ({ s: l.startMs, e: l.endMs, speaker: l.speaker! })),
     rate: r.rateSeries,
-    sentiment: r.sentiment ? { ...r.sentiment, labels: sentimentLabels(r.sentiment.keys, d.sentimentParameters) } : null,
+    sentiment: r.sentiment
+      ? { ...r.sentiment, labels: sentimentLabels(r.sentiment.keys, d.sentimentParameters), ranges: sentimentRanges(r.sentiment.keys, d.sentimentParameters) }
+      : null,
     fillers: r.fillers.times,
   };
   $("timeline-panel").hidden = false;
@@ -229,6 +237,29 @@ function sentimentLabels(keys: string[], params: unknown): string[] {
   return keys.map((k) => found.get(k) ?? k);
 }
 
+/**
+ * パラメータ一覧の { name, minimum, maximum } から値の範囲を引く。
+ * 範囲が決まっている値（エネルギーは 0〜100、雰囲気は -100〜100）は、その範囲で縦軸を描く。
+ * データの最小と最大で描くと、わずかな揺れも大きな山に見えてしまうため。
+ */
+function sentimentRanges(keys: string[], params: unknown): ({ min: number; max: number } | null)[] {
+  const found = new Map<string, { min: number; max: number }>();
+  const visit = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    const o = node as Record<string, unknown>;
+    if (typeof o.name === "string" && keys.includes(o.name) && typeof o.minimum === "number" && typeof o.maximum === "number" && o.maximum > o.minimum) {
+      found.set(o.name, { min: o.minimum, max: o.maximum });
+    }
+    Object.values(o).forEach(visit);
+  };
+  visit(params);
+  return keys.map((k) => found.get(k) ?? null);
+}
+
 function trackWidth(svg: SVGSVGElement): number {
   return Math.max(200, svg.clientWidth || svg.parentElement?.clientWidth || 600);
 }
@@ -273,6 +304,7 @@ function drawTimeline(): void {
       $("svg-sentiment") as unknown as SVGSVGElement,
       tl.sentiment.segments.map((s) => ({ t: (s.s + s.e) / 2, v: s.v[i] ?? 0 })),
       "",
+      tl.sentiment.ranges[i] ?? undefined,
     );
   }
 
@@ -306,7 +338,7 @@ function drawTimeline(): void {
 }
 
 /** 単一系列の折れ線（2px）。y 軸は 0 から始め、最大値の目盛りを左上に小さく書く。 */
-function drawLine(el: SVGSVGElement, points: { t: number; v: number }[], unit: string): void {
+function drawLine(el: SVGSVGElement, points: { t: number; v: number }[], unit: string, range?: { min: number; max: number }): void {
   const w = trackWidth(el);
   const h = 72;
   const x = xScale(w);
@@ -315,11 +347,11 @@ function drawLine(el: SVGSVGElement, points: { t: number; v: number }[], unit: s
     el.replaceChildren();
     return;
   }
-  const max = niceMax(Math.max(...points.map((p) => p.v)));
-  const min = Math.min(0, ...points.map((p) => p.v));
+  const max = range ? range.max : niceMax(Math.max(...points.map((p) => p.v)));
+  const min = range ? range.min : Math.min(0, ...points.map((p) => p.v));
   const y = (v: number) => 6 + (1 - (v - min) / (max - min || 1)) * (h - 12);
   const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
-  const grid = [max, min === 0 ? max / 2 : 0].map((v) => svg("line", { x1: PAD_L, x2: w - PAD_R, y1: y(v), y2: y(v), class: "grid-line" }));
+  const grid = [max, min < 0 && max > 0 ? 0 : (min + max) / 2].map((v) => svg("line", { x1: PAD_L, x2: w - PAD_R, y1: y(v), y2: y(v), class: "grid-line" }));
   const base = svg("line", { x1: PAD_L, x2: w - PAD_R, y1: y(min), y2: y(min), class: "base-line" });
   const top = svg("text", { x: PAD_L + 2, y: y(max) + 11, class: "axis-label" });
   top.textContent = `${max}${unit ? ` ${unit}` : ""}`;
