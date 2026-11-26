@@ -506,7 +506,7 @@ WebSocket の話者ダイアライゼーション（`useDiarizer=1`）は、セ�
 
 ソースコードは GitHub に置いています。
 
-<!-- TODO: リポジトリを公開したら URL を入れる -->
+https://github.com/ponyo877/amivoice-live
 
 ```sh
 git clone https://github.com/ponyo877/amivoice-live.git
@@ -525,7 +525,6 @@ API キーがなくても、AmiVoice のプロトコルを真似たモックサ�
 ```sh
 IRODORI_TTS_DIR=... WOOSH_DIR=... AMIVOICE_API_KEY=... ANTHROPIC_API_KEY=... sh eval/run-experiments.sh
 ```
-
 
 「実際の登壇で試す」の比べ方は、手元の録音で次のようにやり直せます（動画の音声はリポジトリに含めていません）。
 スライドの代わりに、Zenn の記事の URL やテキストファイルから辞書を作れます。
