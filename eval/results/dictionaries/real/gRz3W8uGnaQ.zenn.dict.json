@@ -1,0 +1,440 @@
+{
+ "terms": [
+  {
+   "written": "Mastra",
+   "readings": [
+    "ますとら"
+   ],
+   "source": "タイトル"
+  },
+  {
+   "written": "RAG",
+   "readings": [
+    "らぐ",
+    "あーるえーじー"
+   ],
+   "source": "タイトル"
+  },
+  {
+   "written": "マナリンク",
+   "readings": [
+    "まなりんく"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "Vercel AI SDK",
+   "readings": [
+    "ばーせるえーあいえすでぃーけー",
+    "ゔぁーせるえーあいえすでぃーけー"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "Vercel",
+   "readings": [
+    "ばーせる",
+    "ゔぁーせる"
+   ],
+   "source": "ローカル環境の構築"
+  },
+  {
+   "written": "useChat",
+   "readings": [
+    "ゆーずちゃっと"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "useStructuredChat",
+   "readings": [
+    "ゆーずすとらくちゃーどちゃっと"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "useObject",
+   "readings": [
+    "ゆーずおぶじぇくと"
+   ],
+   "source": "2. useObjectを用いる"
+  },
+  {
+   "written": "parsePartialJson",
+   "readings": [
+    "ぱーすぱーしゃるじぇいそん",
+    "ぱーすぱーしゃるじぇーそん"
+   ],
+   "source": "3. 検証したこと"
+  },
+  {
+   "written": "streamObject",
+   "readings": [
+    "すとりーむおぶじぇくと"
+   ],
+   "source": "3. 検証したこと"
+  },
+  {
+   "written": "experimental_output",
+   "readings": [
+    "えくすぺりめんたるあうとぷっと"
+   ],
+   "source": "4. カスタムフックの開発"
+  },
+  {
+   "written": "DeepPartial",
+   "readings": [
+    "でぃーぷぱーしゃる"
+   ],
+   "source": "4. カスタムフックの開発"
+  },
+  {
+   "written": "Zod",
+   "readings": [
+    "ぞっど"
+   ],
+   "source": "2. useObjectを用いる"
+  },
+  {
+   "written": "SafeParse",
+   "readings": [
+    "せーふぱーす"
+   ],
+   "source": "4. カスタムフックの開発"
+  },
+  {
+   "written": "LLM",
+   "readings": [
+    "えるえるえむ"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "Next.js",
+   "readings": [
+    "ねくすとじぇいえす",
+    "ねくすとどっとじぇいえす",
+    "ねくすとじぇーえす"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "React Native",
+   "readings": [
+    "りあくとねいてぃぶ",
+    "りあくとねーてぃぶ"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "React",
+   "readings": [
+    "りあくと"
+   ],
+   "source": "構造化データが必要な理由"
+  },
+  {
+   "written": "Expo",
+   "readings": [
+    "えくすぽ"
+   ],
+   "source": "バージョン情報"
+  },
+  {
+   "written": "AWS",
+   "readings": [
+    "えーだぶりゅーえす"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "Embedding",
+   "readings": [
+    "えんべでぃんぐ"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "HyDE",
+   "readings": [
+    "はいど"
+   ],
+   "source": "AIエージェントの動作速度"
+  },
+  {
+   "written": "Otel",
+   "readings": [
+    "おーてる",
+    "おーてぃーいーえる"
+   ],
+   "source": "ロギング"
+  },
+  {
+   "written": "CloudWatch",
+   "readings": [
+    "くらうどうぉっち"
+   ],
+   "source": "ロギング"
+  },
+  {
+   "written": "Pino",
+   "readings": [
+    "ぴの",
+    "ぴーの"
+   ],
+   "source": "ロギング"
+  },
+  {
+   "written": "PinoLogger",
+   "readings": [
+    "ぴのろがー"
+   ],
+   "source": "ロギング"
+  },
+  {
+   "written": "Nginx",
+   "readings": [
+    "えんじんえっくす"
+   ],
+   "source": "ローカル環境の構築"
+  },
+  {
+   "written": "proxy_buffering",
+   "readings": [
+    "ぷろきしばっふぁりんぐ",
+    "ぷろきしーばっふぁりんぐ"
+   ],
+   "source": "ローカル環境の構築"
+  },
+  {
+   "written": "App Router",
+   "readings": [
+    "あっぷるーたー",
+    "あっぷらうたー"
+   ],
+   "source": "アプリケーションサイドの障壁"
+  },
+  {
+   "written": "Pages Router",
+   "readings": [
+    "ぺーじずるーたー",
+    "ぺーじずらうたー"
+   ],
+   "source": "アプリケーションサイドの障壁"
+  },
+  {
+   "written": "API Route",
+   "readings": [
+    "えーぴーあいるーと"
+   ],
+   "source": "アプリケーションサイドの障壁"
+  },
+  {
+   "written": "Chunked Response",
+   "readings": [
+    "ちゃんくとれすぽんす",
+    "ちゃんくどれすぽんす"
+   ],
+   "source": "HTTPレイヤーの障壁"
+  },
+  {
+   "written": "ChatGPT",
+   "readings": [
+    "ちゃっとじーぴーてぃー"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "Claude",
+   "readings": [
+    "くろーど"
+   ],
+   "source": "ストリーミング表示が求められる背景"
+  },
+  {
+   "written": "Gemini",
+   "readings": [
+    "じぇみに"
+   ],
+   "source": "ストリーミング表示が求められる背景"
+  },
+  {
+   "written": "SWR",
+   "readings": [
+    "えすだぶりゅーあーる"
+   ],
+   "source": "柔軟な処理連携"
+  },
+  {
+   "written": "Cursor",
+   "readings": [
+    "かーそる"
+   ],
+   "source": "エンジニアの肌感覚"
+  },
+  {
+   "written": "MCP",
+   "readings": [
+    "えむしーぴー"
+   ],
+   "source": "エンジニアの肌感覚"
+  },
+  {
+   "written": "Linear",
+   "readings": [
+    "りにあ"
+   ],
+   "source": "エンジニアの肌感覚"
+  },
+  {
+   "written": "Coding Agent",
+   "readings": [
+    "こーでぃんぐえーじぇんと"
+   ],
+   "source": "まとめ"
+  },
+  {
+   "written": "ハルシネーション",
+   "readings": [
+    "はるしねーしょん"
+   ],
+   "source": "プリミティブなツール提供"
+  },
+  {
+   "written": "topK",
+   "readings": [
+    "とっぷけー"
+   ],
+   "source": "構造化データと非構造化データの検索"
+  },
+  {
+   "written": "Vector検索",
+   "readings": [
+    "べくたーけんさく"
+   ],
+   "source": "構造化データと非構造化データの検索"
+  },
+  {
+   "written": "カナリアリリース",
+   "readings": [
+    "かなりありりーす"
+   ],
+   "source": "エージェントの価値を伝える"
+  },
+  {
+   "written": "WYSIWYG",
+   "readings": [
+    "うぃじうぃぐ",
+    "うぃじーうぃぐ"
+   ],
+   "source": "余談"
+  },
+  {
+   "written": "Input Schema",
+   "readings": [
+    "いんぷっとすきーま"
+   ],
+   "source": "AIエージェントの動作速度"
+  },
+  {
+   "written": "Instruction",
+   "readings": [
+    "いんすとらくしょん"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "tool-invocation",
+   "readings": [
+    "つーるいんぼけーしょん"
+   ],
+   "source": "4. カスタムフックの開発"
+  },
+  {
+   "written": "notFoundReasonMessage",
+   "readings": [
+    "のっとふぁうんどりーずんめっせーじ"
+   ],
+   "source": "よかったこと"
+  },
+  {
+   "written": "toDataStreamResponse",
+   "readings": [
+    "とぅーでーたすとりーむれすぽんす"
+   ],
+   "source": "4. カスタムフックの開発"
+  },
+  {
+   "written": "DataStream",
+   "readings": [
+    "でーたすとりーむ"
+   ],
+   "source": "3. 検証したこと"
+  },
+  {
+   "written": "Markdown",
+   "readings": [
+    "まーくだうん"
+   ],
+   "source": "1. useChatを単に用いる"
+  },
+  {
+   "written": "JSON",
+   "readings": [
+    "じぇいそん",
+    "じぇーそん"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "UX",
+   "readings": [
+    "ゆーえっくす"
+   ],
+   "source": "冒頭"
+  },
+  {
+   "written": "CTO",
+   "readings": [
+    "しーてぃーおー"
+   ],
+   "source": "AIエージェント以外の選択肢"
+  },
+  {
+   "written": "IDE",
+   "readings": [
+    "あいでぃーいー"
+   ],
+   "source": "エンジニアの肌感覚"
+  },
+  {
+   "written": "toC",
+   "readings": [
+    "とぅーしー",
+    "びーとぅーしー"
+   ],
+   "source": "AIエージェントの動作速度"
+  },
+  {
+   "written": "Meijin_garden",
+   "readings": [
+    "めいじんがーでん"
+   ],
+   "source": "まとめ"
+  },
+  {
+   "written": "アンラーニング",
+   "readings": [
+    "あんらーにんぐ"
+   ],
+   "source": "余談"
+  },
+  {
+   "written": "人月",
+   "readings": [
+    "にんげつ"
+   ],
+   "source": "開発工数と担当分担"
+  }
+ ]
+}

@@ -1,0 +1,295 @@
+{
+ "terms": [
+  {
+   "written": "MCP",
+   "readings": [
+    "えむしーぴー"
+   ],
+   "source": "タイトル"
+  },
+  {
+   "written": "Kurage UI",
+   "readings": [
+    "くらげゆーあい"
+   ],
+   "source": "はじめに"
+  },
+  {
+   "written": "Model Context Protocol",
+   "readings": [
+    "もでるこんてきすとぷろとこる"
+   ],
+   "source": "使用技術"
+  },
+  {
+   "written": "TypeScript",
+   "readings": [
+    "たいぷすくりぷと"
+   ],
+   "source": "タイトル"
+  },
+  {
+   "written": "Claude Code",
+   "readings": [
+    "くろーどこーど"
+   ],
+   "source": "はじめに"
+  },
+  {
+   "written": "Vibe Coding",
+   "readings": [
+    "ばいぶこーでぃんぐ"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "ユニフォームネクスト",
+   "readings": [
+    "ゆにふぉーむねくすと"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "Zenn",
+   "readings": [
+    "ぜん"
+   ],
+   "source": "はじめに"
+  },
+  {
+   "written": "Next.js",
+   "readings": [
+    "ねくすとじぇいえす",
+    "ねくすとどっとじぇいえす"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "React",
+   "readings": [
+    "りあくと"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "Material UI",
+   "readings": [
+    "まてりあるゆーあい"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "SaaS",
+   "readings": [
+    "さーす"
+   ],
+   "source": "背景"
+  },
+  {
+   "written": "Node.js",
+   "readings": [
+    "のーどじぇいえす",
+    "のーどどっとじぇいえす"
+   ],
+   "source": "使用技術"
+  },
+  {
+   "written": "bun",
+   "readings": [
+    "ばん"
+   ],
+   "source": "使用技術"
+  },
+  {
+   "written": "SDK",
+   "readings": [
+    "えすでぃーけー"
+   ],
+   "source": "使用技術"
+  },
+  {
+   "written": "MCP クライアント",
+   "readings": [
+    "えむしーぴーくらいあんと"
+   ],
+   "source": "MCP の構成"
+  },
+  {
+   "written": "MCP サーバー",
+   "readings": [
+    "えむしーぴーさーばー"
+   ],
+   "source": "MCP の構成"
+  },
+  {
+   "written": "AI エージェント",
+   "readings": [
+    "えーあいえーじぇんと"
+   ],
+   "source": "MCP とは"
+  },
+  {
+   "written": "get_available_components_and_utilities",
+   "readings": [
+    "げっとあべいらぶるこんぽーねんつあんどゆーてぃりてぃーず"
+   ],
+   "source": "MCP サーバー作成の方針"
+  },
+  {
+   "written": "get_component",
+   "readings": [
+    "げっとこんぽーねんと"
+   ],
+   "source": "MCP サーバー作成の方針"
+  },
+  {
+   "written": "get_utility",
+   "readings": [
+    "げっとゆーてぃりてぃ",
+    "げっとゆーてぃりてぃー"
+   ],
+   "source": "MCP サーバー作成の方針"
+  },
+  {
+   "written": "ユーティリティ関数",
+   "readings": [
+    "ゆーてぃりてぃかんすう",
+    "ゆーてぃりてぃーかんすう"
+   ],
+   "source": "MCP サーバー作成の方針"
+  },
+  {
+   "written": "Notion",
+   "readings": [
+    "のーしょん"
+   ],
+   "source": "MCP とは"
+  },
+  {
+   "written": "Slack",
+   "readings": [
+    "すらっく"
+   ],
+   "source": "MCP とは"
+  },
+  {
+   "written": "Storybook",
+   "readings": [
+    "すとーりーぶっく"
+   ],
+   "source": "Kurage UI の構成"
+  },
+  {
+   "written": "zod",
+   "readings": [
+    "ぞっど"
+   ],
+   "source": "依存関係のインストール"
+  },
+  {
+   "written": "npm",
+   "readings": [
+    "えぬぴーえむ"
+   ],
+   "source": "環境構築"
+  },
+  {
+   "written": "McpServer",
+   "readings": [
+    "えむしーぴーさーばー"
+   ],
+   "source": "MCP サーバーの初期化"
+  },
+  {
+   "written": "DevContainer",
+   "readings": [
+    "でぶこんてな",
+    "でぶこんてなー"
+   ],
+   "source": "配布"
+  },
+  {
+   "written": "Docker",
+   "readings": [
+    "どっかー"
+   ],
+   "source": "配布"
+  },
+  {
+   "written": "Dockerfile",
+   "readings": [
+    "どっかーふぁいる"
+   ],
+   "source": "配布"
+  },
+  {
+   "written": "npm script",
+   "readings": [
+    "えぬぴーえむすくりぷと"
+   ],
+   "source": "配布"
+  },
+  {
+   "written": "Github Copilot",
+   "readings": [
+    "ぎっとはぶこぱいろっと"
+   ],
+   "source": "動作確認"
+  },
+  {
+   "written": "VsCode",
+   "readings": [
+    "ぶいえすこーど"
+   ],
+   "source": "動作確認"
+  },
+  {
+   "written": "Cursor",
+   "readings": [
+    "かーそる",
+    "かーさー"
+   ],
+   "source": "動作確認"
+  },
+  {
+   "written": "API",
+   "readings": [
+    "えーぴーあい"
+   ],
+   "source": "MCP とは"
+  },
+  {
+   "written": "index.ts",
+   "readings": [
+    "いんでっくすてぃーえす",
+    "いんでっくすどっとてぃーえす"
+   ],
+   "source": "Kurage UI の構成"
+  },
+  {
+   "written": "package.json",
+   "readings": [
+    "ぱっけーじじぇいそん",
+    "ぱっけーじどっとじぇいそん"
+   ],
+   "source": "Kurage UI の構成"
+  },
+  {
+   "written": "server.tool",
+   "readings": [
+    "さーばーつーる",
+    "さーばーどっとつーる"
+   ],
+   "source": "コーディング"
+  },
+  {
+   "written": "sudo",
+   "readings": [
+    "すーどぅー",
+    "すど",
+    "すーどー"
+   ],
+   "source": "配布"
+  }
+ ]
+}

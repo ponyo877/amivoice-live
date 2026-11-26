@@ -1,0 +1,106 @@
+{
+ "terms": [
+  {
+   "written": "RAG",
+   "readings": [
+    "らぐ"
+   ]
+  },
+  {
+   "written": "LLM",
+   "readings": [
+    "えるえるえむ"
+   ]
+  },
+  {
+   "written": "Embedding",
+   "readings": [
+    "えんべでぃんぐ"
+   ]
+  },
+  {
+   "written": "PostgreSQL",
+   "readings": [
+    "ぽすとぐれすきゅーえる"
+   ]
+  },
+  {
+   "written": "pgvector",
+   "readings": [
+    "ぴーじーべくたー"
+   ]
+  },
+  {
+   "written": "BM25",
+   "readings": [
+    "びーえむにじゅうご"
+   ]
+  },
+  {
+   "written": "RRF",
+   "readings": [
+    "あーるあーるえふ"
+   ]
+  },
+  {
+   "written": "Recall@10",
+   "readings": [
+    "りこーるあっとてん"
+   ]
+  },
+  {
+   "written": "nDCG",
+   "readings": [
+    "えぬでぃーしーじー"
+   ]
+  },
+  {
+   "written": "Cohere Rerank",
+   "readings": [
+    "こーひありらんく"
+   ]
+  },
+  {
+   "written": "HNSW",
+   "readings": [
+    "えいちえぬえすだぶりゅー"
+   ]
+  },
+  {
+   "written": "LLM-as-a-Judge",
+   "readings": [
+    "えるえるえむあずあじゃっじ"
+   ]
+  },
+  {
+   "written": "Ragas",
+   "readings": [
+    "らがす"
+   ]
+  },
+  {
+   "written": "MCP",
+   "readings": [
+    "えむしーぴー"
+   ]
+  },
+  {
+   "written": "Claude",
+   "readings": [
+    "くろーど"
+   ]
+  },
+  {
+   "written": "LangChain",
+   "readings": [
+    "らんぐちぇーん"
+   ]
+  },
+  {
+   "written": "LlamaIndex",
+   "readings": [
+    "らまいんでっくす"
+   ]
+  }
+ ]
+}

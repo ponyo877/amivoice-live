@@ -1,0 +1,185 @@
+{
+ "terms": [
+  {
+   "written": "Durable Objects",
+   "readings": [
+    "でゅらぶるおぶじぇくつ",
+    "でゅーらぶるおぶじぇくつ"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "Hibernation API",
+   "readings": [
+    "はいばねーしょんえーぴーあい",
+    "はいばーねーしょんえーぴーあい"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "Cloudflare Workers",
+   "readings": [
+    "くらうどふれあわーかーず",
+    "くらうどふれあーわーかーず"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "Cloudflare",
+   "readings": [
+    "くらうどふれあ",
+    "くらうどふれあー"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "WebSocket",
+   "readings": [
+    "うぇぶそけっと"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "SQLite",
+   "readings": [
+    "えすきゅーらいと",
+    "えすきゅーえるらいと",
+    "しーくぇるらいと"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "blockConcurrencyWhile",
+   "readings": [
+    "ぶろっくこんかれんしーほわいる",
+    "ぶろっくこんかれんしーわいる"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "setAlarm",
+   "readings": [
+    "せっとあらーむ"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "Cron Triggers",
+   "readings": [
+    "くろんとりがーず",
+    "くーろんとりがーず"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "Wrangler",
+   "readings": [
+    "らんぐらー",
+    "らんぐら"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "Miniflare",
+   "readings": [
+    "みにふれあ",
+    "みにふれあー"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "Vite",
+   "readings": [
+    "びーと",
+    "ゔぃーと"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "Vitest",
+   "readings": [
+    "びーてすと",
+    "ゔぃてすと",
+    "ゔぃーてすと",
+    "びてすと"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "Hono",
+   "readings": [
+    "ほの",
+    "ほのー"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "TypeScript",
+   "readings": [
+    "たいぷすくりぷと"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "R2",
+   "readings": [
+    "あーるつー"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "D1",
+   "readings": [
+    "でぃーわん"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "fetch",
+   "readings": [
+    "ふぇっち"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "acceptWebSocket",
+   "readings": [
+    "あくせぷとうぇぶそけっと"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "@cloudflare/vite-plugin",
+   "readings": [
+    "くらうどふれあびーとぷらぐいん"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "API",
+   "readings": [
+    "えーぴーあい"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "LT",
+   "readings": [
+    "えるてぃー",
+    "らいとにんぐとーく"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "SQL",
+   "readings": [
+    "えすきゅーえる",
+    "しーくぇる"
+   ],
+   "source": "p.5"
+  }
+ ],
+ "source": "workers.slides.pdf",
+ "elapsedMs": 10301,
+ "at": "2026-11-26T04:00:17.283Z"
+}

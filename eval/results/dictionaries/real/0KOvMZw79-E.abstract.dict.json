@@ -1,0 +1,61 @@
+{
+ "terms": [
+  {
+   "written": "ts-pattern",
+   "readings": [
+    "てぃーえすぱたーん",
+    "たいぷすくりぷとぱたーん"
+   ],
+   "source": "タイトル・概要"
+  },
+  {
+   "written": "Result型",
+   "readings": [
+    "りざるとがた"
+   ],
+   "source": "タイトル・概要"
+  },
+  {
+   "written": "TypeScript",
+   "readings": [
+    "たいぷすくりぷと"
+   ],
+   "source": "概要"
+  },
+  {
+   "written": "AIコーディング",
+   "readings": [
+    "えーあいこーでぃんぐ"
+   ],
+   "source": "概要"
+  },
+  {
+   "written": "型安全",
+   "readings": [
+    "かたあんぜん"
+   ],
+   "source": "概要"
+  },
+  {
+   "written": "AI",
+   "readings": [
+    "えーあい"
+   ],
+   "source": "タイトル・概要"
+  },
+  {
+   "written": "ライトニングトーク",
+   "readings": [
+    "らいとにんぐとーく"
+   ],
+   "source": "概要"
+  },
+  {
+   "written": "TS",
+   "readings": [
+    "てぃーえす"
+   ],
+   "source": "タイトル"
+  }
+ ]
+}

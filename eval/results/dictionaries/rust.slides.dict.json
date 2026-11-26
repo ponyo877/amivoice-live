@@ -1,0 +1,219 @@
+{
+ "terms": [
+  {
+   "written": "Tokio",
+   "readings": [
+    "ときお",
+    "とーきおー",
+    "ときよ"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "axum",
+   "readings": [
+    "あくさむ",
+    "あくすむ",
+    "あっくすむ"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "serde",
+   "readings": [
+    "さーでぃー",
+    "せるで",
+    "さーで",
+    "せーで"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "Rust",
+   "readings": [
+    "らすと"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "Mutex",
+   "readings": [
+    "みゅーてっくす",
+    "むてっくす"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "spawn_blocking",
+   "readings": [
+    "すぽーんぶろっきんぐ"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "Clippy",
+   "readings": [
+    "くりっぴー"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "await_holding_lock",
+   "readings": [
+    "あうぇいとほーるでぃんぐろっく"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": ".await",
+   "readings": [
+    "あうぇいと",
+    "どっとあうぇいと"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "tokio-console",
+   "readings": [
+    "ときおこんそーる",
+    "ときおーこんそーる"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "tracing",
+   "readings": [
+    "とれーしんぐ"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "MutexGuard",
+   "readings": [
+    "みゅーてっくすがーど",
+    "むてっくすがーど"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "borrow checker",
+   "readings": [
+    "ぼろーちぇっかー",
+    "ばろーちぇっかー"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "select!",
+   "readings": [
+    "せれくと",
+    "せれくとまくろ"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "Future",
+   "readings": [
+    "ふゅーちゃー"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "Send",
+   "readings": [
+    "せんど"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "crates.io",
+   "readings": [
+    "くれいつあいおー",
+    "くれーつどっとあいおー",
+    "くれーつあいおー"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "Cargo workspace",
+   "readings": [
+    "かーごわーくすぺーす"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "Cargo",
+   "readings": [
+    "かーご"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "feature",
+   "readings": [
+    "ふぃーちゃー"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "Arc",
+   "readings": [
+    "あーく"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "デッドロック",
+   "readings": [
+    "でっどろっく"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "キャンセル安全",
+   "readings": [
+    "きゃんせるあんぜん"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "ワーカースレッド",
+   "readings": [
+    "わーかーすれっど"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "drop",
+   "readings": [
+    "どろっぷ"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "スパン",
+   "readings": [
+    "すぱん"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "非同期処理",
+   "readings": [
+    "ひどうきしょり"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "LT",
+   "readings": [
+    "えるてぃー",
+    "らいとにんぐとーく"
+   ],
+   "source": "p.1"
+  }
+ ],
+ "source": "rust.slides.pdf",
+ "elapsedMs": 10943,
+ "at": "2026-11-26T04:00:06.979Z"
+}

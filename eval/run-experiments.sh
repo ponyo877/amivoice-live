@@ -83,7 +83,7 @@ if has summary; then
   for id in $IDS; do
     node eval/examples.ts "$id" eval/out/$id.a-general.nodict.jsonl eval/out/$id.a-general.slides.jsonl \
       eval/out/$id.a2-ja-general.nodict.jsonl eval/out/$id.a2-ja-general.slides.jsonl \
-      eval/out/$id.a2b-ja-general.slides.spk.async.json > "eval/results/examples-$id.md" || FAILED=1
+      eval/out/$id.a-general.slides.spk.async.json eval/out/$id.a2b-ja-general.slides.spk.async.json > "eval/results/examples-$id.md" || FAILED=1
   done
 fi
 exit "$FAILED"

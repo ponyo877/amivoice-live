@@ -1,0 +1,118 @@
+{
+ "terms": [
+  {
+   "written": "Cloudflare Workers",
+   "readings": [
+    "くらうどふれあわーかーず"
+   ]
+  },
+  {
+   "written": "WebSocket",
+   "readings": [
+    "うぇぶそけっと"
+   ]
+  },
+  {
+   "written": "Durable Objects",
+   "readings": [
+    "でゅらぶるおぶじぇくつ"
+   ]
+  },
+  {
+   "written": "Hibernation API",
+   "readings": [
+    "はいばねーしょんえーぴーあい"
+   ]
+  },
+  {
+   "written": "SQLite",
+   "readings": [
+    "えすきゅーらいと"
+   ]
+  },
+  {
+   "written": "API",
+   "readings": [
+    "えーぴーあい"
+   ]
+  },
+  {
+   "written": "SQL",
+   "readings": [
+    "えすきゅーえる"
+   ]
+  },
+  {
+   "written": "blockConcurrencyWhile",
+   "readings": [
+    "ぶろっくこんかれんしーほわいる"
+   ]
+  },
+  {
+   "written": "fetch",
+   "readings": [
+    "ふぇっち"
+   ]
+  },
+  {
+   "written": "Cron Triggers",
+   "readings": [
+    "くーろんとりがー"
+   ]
+  },
+  {
+   "written": "setAlarm",
+   "readings": [
+    "せっとあらーむ"
+   ]
+  },
+  {
+   "written": "Wrangler",
+   "readings": [
+    "らんぐらー"
+   ]
+  },
+  {
+   "written": "Miniflare",
+   "readings": [
+    "みにふれあ"
+   ]
+  },
+  {
+   "written": "Vite",
+   "readings": [
+    "ゔぃーと"
+   ]
+  },
+  {
+   "written": "Workers",
+   "readings": [
+    "わーかーず"
+   ]
+  },
+  {
+   "written": "Hono",
+   "readings": [
+    "ほの"
+   ]
+  },
+  {
+   "written": "Vitest",
+   "readings": [
+    "ゔぃーてすと"
+   ]
+  },
+  {
+   "written": "R2",
+   "readings": [
+    "あーるつー"
+   ]
+  },
+  {
+   "written": "D1",
+   "readings": [
+    "でぃーわん"
+   ]
+  }
+ ]
+}

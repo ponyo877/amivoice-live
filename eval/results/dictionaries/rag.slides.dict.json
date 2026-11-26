@@ -1,0 +1,188 @@
+{
+ "terms": [
+  {
+   "written": "RAG",
+   "readings": [
+    "らぐ",
+    "あーるえーじー"
+   ],
+   "source": "p.1"
+  },
+  {
+   "written": "pgvector",
+   "readings": [
+    "ぴーじーべくたー",
+    "ぴーじーべくとる"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "BM25",
+   "readings": [
+    "びーえむにじゅうご",
+    "びーえむつーふぁいぶ"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "RRF",
+   "readings": [
+    "あーるあーるえふ"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "Reciprocal Rank Fusion",
+   "readings": [
+    "れしぷろかるらんくふゅーじょん"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "nDCG",
+   "readings": [
+    "えぬでぃーしーじー"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "Recall@10",
+   "readings": [
+    "りこーるあっとてん",
+    "りこーるあっとじゅう"
+   ],
+   "source": "p.5"
+  },
+  {
+   "written": "Cohere Rerank",
+   "readings": [
+    "こひあーりらんく",
+    "こひありらんく"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "Cohere",
+   "readings": [
+    "こひあー",
+    "こひあ"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "HNSW",
+   "readings": [
+    "えいちえぬえすだぶりゅー",
+    "えっちえぬえすだぶりゅー"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "リランカー",
+   "readings": [
+    "りらんかー"
+   ],
+   "source": "p.6"
+  },
+  {
+   "written": "Ragas",
+   "readings": [
+    "らがす"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "LLM-as-a-Judge",
+   "readings": [
+    "えるえるえむあずあじゃっじ",
+    "えるえるえむあずあじゃっぢ"
+   ],
+   "source": "p.8"
+  },
+  {
+   "written": "MCP",
+   "readings": [
+    "えむしーぴー"
+   ],
+   "source": "p.9"
+  },
+  {
+   "written": "Claude",
+   "readings": [
+    "くろーど"
+   ],
+   "source": "p.9"
+  },
+  {
+   "written": "LangChain",
+   "readings": [
+    "らんぐちぇーん",
+    "らんちぇーん"
+   ],
+   "source": "p.9"
+  },
+  {
+   "written": "LlamaIndex",
+   "readings": [
+    "らまいんでっくす"
+   ],
+   "source": "p.9"
+  },
+  {
+   "written": "LLM",
+   "readings": [
+    "えるえるえむ"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "Embedding",
+   "readings": [
+    "えんべでぃんぐ"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "PostgreSQL",
+   "readings": [
+    "ぽすとぐれすきゅーえる",
+    "ぽすとぐれ",
+    "ぽすぐれ",
+    "ぽすとぐれえすきゅーえる"
+   ],
+   "source": "p.2"
+  },
+  {
+   "written": "ハイブリッド検索",
+   "readings": [
+    "はいぶりっどけんさく"
+   ],
+   "source": "p.4"
+  },
+  {
+   "written": "ベクトル検索",
+   "readings": [
+    "べくとるけんさく"
+   ],
+   "source": "p.3"
+  },
+  {
+   "written": "チャンク",
+   "readings": [
+    "ちゃんく"
+   ],
+   "source": "p.7"
+  },
+  {
+   "written": "LT",
+   "readings": [
+    "えるてぃー",
+    "らいとにんぐとーく"
+   ],
+   "source": "p.1"
+  }
+ ],
+ "source": "rag.slides.pdf",
+ "elapsedMs": 11338,
+ "at": "2026-11-26T03:59:56.034Z"
+}

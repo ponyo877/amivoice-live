@@ -1,0 +1,106 @@
+{
+ "terms": [
+  {
+   "written": "Rust",
+   "readings": [
+    "らすと"
+   ]
+  },
+  {
+   "written": "Tokio",
+   "readings": [
+    "ときお"
+   ]
+  },
+  {
+   "written": "HTTP",
+   "readings": [
+    "えいちてぃーてぃーぴー"
+   ]
+  },
+  {
+   "written": "axum",
+   "readings": [
+    "あくさむ"
+   ]
+  },
+  {
+   "written": "serde",
+   "readings": [
+    "さーでぃ"
+   ]
+  },
+  {
+   "written": "Mutex",
+   "readings": [
+    "みゅーてっくす"
+   ]
+  },
+  {
+   "written": "Arc",
+   "readings": [
+    "あーく"
+   ]
+  },
+  {
+   "written": "Clippy",
+   "readings": [
+    "くりっぴー"
+   ]
+  },
+  {
+   "written": "spawn_blocking",
+   "readings": [
+    "すぽーんぶろっきんぐ"
+   ]
+  },
+  {
+   "written": "select",
+   "readings": [
+    "せれくと"
+   ]
+  },
+  {
+   "written": "Future",
+   "readings": [
+    "ふゅーちゃー"
+   ]
+  },
+  {
+   "written": "tokio-console",
+   "readings": [
+    "ときおこんそーる"
+   ]
+  },
+  {
+   "written": "tracing",
+   "readings": [
+    "とれーしんぐ"
+   ]
+  },
+  {
+   "written": "Send",
+   "readings": [
+    "せんど"
+   ]
+  },
+  {
+   "written": "borrow checker",
+   "readings": [
+    "ぼろーちぇっかー"
+   ]
+  },
+  {
+   "written": "crates.io",
+   "readings": [
+    "くれーつどっとあいおー"
+   ]
+  },
+  {
+   "written": "Cargo",
+   "readings": [
+    "かーご"
+   ]
+  }
+ ]
+}

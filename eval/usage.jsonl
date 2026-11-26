@@ -1,0 +1,150 @@
+{"at":"2026-11-26T04:02:17.188Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":30,"label":"stream probe -a2-multi-general 辞書=oracle"}
+{"at":"2026-11-26T04:02:17.192Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":30,"label":"stream probe -a2-ja-general 辞書=oracle 強調度=0.8 話者分離"}
+{"at":"2026-11-26T04:02:17.237Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":30,"label":"stream probe -a-general 辞書=oracle postTime=800 話者分離"}
+{"at":"2026-11-26T04:03:29.462Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"sentiment":true,"label":"async probe -a-general 辞書=oracle spk.sa.filler"}
+{"at":"2026-11-26T04:03:29.462Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":30,"sentiment":false,"label":"async probe -a2b-ja-general 辞書=oracle spk"}
+{"at":"2026-11-26T04:04:57.220Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers -a-general 辞書=oracle"}
+{"at":"2026-11-26T04:04:57.224Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers -a-general 辞書なし"}
+{"at":"2026-11-26T04:04:57.226Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers -a2-ja-general 辞書=oracle"}
+{"at":"2026-11-26T04:04:57.226Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers -a-general 辞書=slides"}
+{"at":"2026-11-26T04:04:57.228Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers -a-general-input 辞書なし"}
+{"at":"2026-11-26T04:04:57.228Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers -a-general-input 辞書=slides"}
+{"at":"2026-11-26T04:04:57.233Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T04:04:57.243Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T04:04:57.254Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T04:08:00.201Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":182.7,"label":"stream workers -a2-multi-general 辞書=oracle"}
+{"at":"2026-11-26T04:08:00.208Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":182.7,"label":"stream workers -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T04:08:00.208Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":182.7,"label":"stream workers -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T04:11:33.355Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書なし"}
+{"at":"2026-11-26T04:11:33.362Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書=slides"}
+{"at":"2026-11-26T04:11:33.364Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T04:11:33.367Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers.venue -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T04:11:33.367Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書=oracle"}
+{"at":"2026-11-26T04:11:33.368Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書=slides"}
+{"at":"2026-11-26T04:11:33.368Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書なし"}
+{"at":"2026-11-26T04:11:33.372Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers.venue -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T04:11:33.378Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":182.7,"label":"stream workers.venue -a2-ja-general 辞書=oracle"}
+{"at":"2026-11-26T04:17:46.433Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書なし"}
+{"at":"2026-11-26T04:17:46.434Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T04:17:46.434Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書=oracle"}
+{"at":"2026-11-26T04:17:46.434Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書なし"}
+{"at":"2026-11-26T04:17:46.435Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":182.7,"label":"stream workers.venue -a-general-input 辞書=slides"}
+{"at":"2026-11-26T04:17:46.435Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":182.7,"label":"stream workers.venue -a-general 辞書=slides"}
+{"at":"2026-11-26T04:17:56.837Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":163.8,"label":"app browser rust（登壇者の画面から音声ファイル）"}
+{"at":"2026-11-26T04:17:56.837Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":163.8,"label":"app browser rust（登壇者の画面から音声ファイル） アーカイブ"}
+{"at":"2026-11-26T04:17:56.837Z","month":"2026-11","api":"async","engine":"-a-general","seconds":163.8,"sentiment":true,"label":"app browser rust（登壇者の画面から音声ファイル） 振り返り"}
+{"at":"2026-11-26T05:19:14.899Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書なし"}
+{"at":"2026-11-26T05:19:14.902Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=oracle"}
+{"at":"2026-11-26T05:19:14.905Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":214.3,"label":"stream workers -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:19:14.908Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=slides"}
+{"at":"2026-11-26T05:19:14.913Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":214.3,"label":"stream workers -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:19:14.933Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":214.3,"label":"stream workers -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T05:20:55.000Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"app browser rust Irodori（登壇者の画面から音声ファイル）"}
+{"at":"2026-11-26T05:20:55.000Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":192.5,"label":"app browser rust Irodori（登壇者の画面から音声ファイル） アーカイブ"}
+{"at":"2026-11-26T05:20:55.000Z","month":"2026-11","api":"async","engine":"-a-general","seconds":192.5,"sentiment":true,"label":"app browser rust Irodori（登壇者の画面から音声ファイル） 振り返り"}
+{"at":"2026-11-26T05:22:49.377Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=oracle"}
+{"at":"2026-11-26T05:22:49.382Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:22:49.384Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:22:49.393Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":214.3,"label":"stream workers -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:22:49.399Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":214.3,"label":"stream workers -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:22:49.399Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":214.3,"label":"stream workers -a2-multi-general 辞書=oracle"}
+{"at":"2026-11-26T05:26:54.191Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers.venue -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:26:54.198Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers.venue -a-general 辞書なし"}
+{"at":"2026-11-26T05:26:54.199Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers.venue -a-general 辞書=slides"}
+{"at":"2026-11-26T05:26:54.200Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":214.3,"label":"stream workers.venue -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:26:54.209Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":214.3,"label":"stream workers.venue -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:26:54.209Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers.venue -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:26:54.210Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":214.3,"label":"stream workers.venue -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:26:54.211Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":214.3,"label":"stream workers.venue -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:28:46.000Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":30,"label":"app browser rust Irodori 30 秒（記事の GIF）"}
+{"at":"2026-11-26T05:30:58.720Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書なし"}
+{"at":"2026-11-26T05:30:58.725Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":192.5,"label":"stream rust -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:30:58.728Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=oracle"}
+{"at":"2026-11-26T05:30:58.735Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":192.5,"label":"stream rust -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:30:58.740Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":192.5,"label":"stream rust -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T05:30:58.748Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=slides"}
+{"at":"2026-11-26T05:34:11.516Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:34:11.518Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:34:11.522Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":192.5,"label":"stream rust -a2-multi-general 辞書=oracle"}
+{"at":"2026-11-26T05:34:11.526Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=oracle"}
+{"at":"2026-11-26T05:34:11.529Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":192.5,"label":"stream rust -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:34:11.533Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":192.5,"label":"stream rust -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:37:54.382Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust.venue -a-general 辞書なし"}
+{"at":"2026-11-26T05:37:54.384Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":192.5,"label":"stream rust.venue -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:37:54.384Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust.venue -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:37:54.387Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust.venue -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:37:54.388Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":192.5,"label":"stream rust.venue -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:37:54.393Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust.venue -a-general 辞書=slides"}
+{"at":"2026-11-26T05:37:54.394Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":192.5,"label":"stream rust.venue -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:37:54.394Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":192.5,"label":"stream rust.venue -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:41:37.301Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":203.5,"label":"stream rag -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:41:37.307Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":203.5,"label":"stream rag -a-general-input 辞書=oracle"}
+{"at":"2026-11-26T05:41:37.311Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":203.5,"label":"stream rag -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:41:37.314Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=oracle"}
+{"at":"2026-11-26T05:41:37.317Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書なし"}
+{"at":"2026-11-26T05:41:37.320Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=slides"}
+{"at":"2026-11-26T05:45:00.988Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:45:00.989Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:45:00.992Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":203.5,"label":"stream rag -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:45:00.992Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=oracle"}
+{"at":"2026-11-26T05:45:00.998Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":203.5,"label":"stream rag -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:45:01.017Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":203.5,"label":"stream rag -a2-multi-general 辞書=oracle"}
+{"at":"2026-11-26T05:48:54.762Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":203.5,"label":"stream rag.venue -a-general-input 辞書なし"}
+{"at":"2026-11-26T05:48:54.764Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":203.5,"label":"stream rag.venue -a2-multi-general 辞書なし"}
+{"at":"2026-11-26T05:48:54.771Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag.venue -a2-ja-general 辞書なし"}
+{"at":"2026-11-26T05:48:54.772Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag.venue -a2-ja-general 辞書=slides"}
+{"at":"2026-11-26T05:48:54.772Z","month":"2026-11","api":"websocket","engine":"-a2-multi-general","seconds":203.5,"label":"stream rag.venue -a2-multi-general 辞書=slides"}
+{"at":"2026-11-26T05:48:54.774Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag.venue -a-general 辞書なし"}
+{"at":"2026-11-26T05:48:54.782Z","month":"2026-11","api":"websocket","engine":"-a-general-input","seconds":203.5,"label":"stream rag.venue -a-general-input 辞書=slides"}
+{"at":"2026-11-26T05:48:54.787Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag.venue -a-general 辞書=slides"}
+{"at":"2026-11-26T05:52:48.528Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T05:52:48.536Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T05:52:48.539Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T05:52:48.541Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T05:56:53.037Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T05:56:53.040Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T05:56:53.042Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T05:56:53.043Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T06:00:35.893Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T06:00:35.898Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T06:00:35.899Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides postTime=300"}
+{"at":"2026-11-26T06:00:35.900Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides postTime=1200"}
+{"at":"2026-11-26T06:04:29.696Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides 強調度=1"}
+{"at":"2026-11-26T06:04:29.700Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides 強調度=0.3"}
+{"at":"2026-11-26T06:08:34.255Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides 強調度=0.3"}
+{"at":"2026-11-26T06:08:34.273Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides 強調度=1"}
+{"at":"2026-11-26T06:12:17.142Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides 強調度=1"}
+{"at":"2026-11-26T06:12:17.146Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides 強調度=0.3"}
+{"at":"2026-11-26T06:16:10.903Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:16:10.903Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":214.3,"label":"stream workers -a2-ja-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:20:15.504Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":192.5,"label":"stream rust -a2-ja-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:20:15.507Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:23:58.529Z","month":"2026-11","api":"websocket","engine":"-a2-ja-general","seconds":203.5,"label":"stream rag -a2-ja-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:23:58.533Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=slides 話者分離"}
+{"at":"2026-11-26T06:27:52.193Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":214.3,"sentiment":false,"label":"async workers -a2b-ja-general 辞書なし spk"}
+{"at":"2026-11-26T06:27:52.205Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":214.3,"sentiment":false,"label":"async workers -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:27:52.206Z","month":"2026-11","api":"async","engine":"-a-general","seconds":214.3,"sentiment":false,"label":"async workers -a-general 辞書なし spk"}
+{"at":"2026-11-26T06:27:52.208Z","month":"2026-11","api":"async","engine":"-a-general","seconds":214.3,"sentiment":false,"label":"async workers -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:30:27.284Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":214.3,"sentiment":false,"label":"async workers.venue -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:30:27.297Z","month":"2026-11","api":"async","engine":"-a-general","seconds":214.3,"sentiment":false,"label":"async workers.venue -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:33:22.583Z","month":"2026-11","api":"async","engine":"-a-general","seconds":214.3,"sentiment":false,"label":"async workers -a-general 辞書=slides filler"}
+{"at":"2026-11-26T06:35:16.363Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":192.5,"sentiment":false,"label":"async rust -a2b-ja-general 辞書なし spk"}
+{"at":"2026-11-26T06:35:16.375Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":192.5,"sentiment":false,"label":"async rust -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:35:16.377Z","month":"2026-11","api":"async","engine":"-a-general","seconds":192.5,"sentiment":false,"label":"async rust -a-general 辞書なし spk"}
+{"at":"2026-11-26T06:35:16.379Z","month":"2026-11","api":"async","engine":"-a-general","seconds":192.5,"sentiment":false,"label":"async rust -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:37:10.613Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":192.5,"sentiment":false,"label":"async rust.venue -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:37:10.623Z","month":"2026-11","api":"async","engine":"-a-general","seconds":192.5,"sentiment":false,"label":"async rust.venue -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:38:24.007Z","month":"2026-11","api":"async","engine":"-a-general","seconds":192.5,"sentiment":false,"label":"async rust -a-general 辞書=slides filler"}
+{"at":"2026-11-26T06:39:47.023Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":203.5,"sentiment":false,"label":"async rag -a2b-ja-general 辞書なし spk"}
+{"at":"2026-11-26T06:39:47.034Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":203.5,"sentiment":false,"label":"async rag -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:39:47.035Z","month":"2026-11","api":"async","engine":"-a-general","seconds":203.5,"sentiment":false,"label":"async rag -a-general 辞書なし spk"}
+{"at":"2026-11-26T06:39:47.037Z","month":"2026-11","api":"async","engine":"-a-general","seconds":203.5,"sentiment":false,"label":"async rag -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:42:21.694Z","month":"2026-11","api":"async","engine":"-a2b-ja-general","seconds":203.5,"sentiment":false,"label":"async rag.venue -a2b-ja-general 辞書=slides spk"}
+{"at":"2026-11-26T06:42:21.705Z","month":"2026-11","api":"async","engine":"-a-general","seconds":203.5,"sentiment":false,"label":"async rag.venue -a-general 辞書=slides spk"}
+{"at":"2026-11-26T06:43:05.211Z","month":"2026-11","api":"async","engine":"-a-general","seconds":203.5,"sentiment":false,"label":"async rag -a-general 辞書=slides filler"}
+{"at":"2026-11-26T06:44:28.629Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":344.9,"label":"stream gRz3W8uGnaQ -a-general 辞書=zenn"}
+{"at":"2026-11-26T06:44:28.630Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":344.9,"label":"stream gRz3W8uGnaQ -a-general 辞書なし"}
+{"at":"2026-11-26T06:50:46.986Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":282.2,"label":"stream m1Y1QhJUN2k -a-general 辞書なし"}
+{"at":"2026-11-26T06:50:46.997Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":282.2,"label":"stream m1Y1QhJUN2k -a-general 辞書=zenn"}
+{"at":"2026-11-26T06:56:00.104Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":254.8,"label":"stream 0KOvMZw79-E -a-general 辞書なし"}
+{"at":"2026-11-26T06:56:00.107Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":254.8,"label":"stream 0KOvMZw79-E -a-general 辞書=abstract"}
