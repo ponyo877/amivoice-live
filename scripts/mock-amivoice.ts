@@ -386,7 +386,15 @@ async function onHttp(req: IncomingMessage, res: ServerResponse): Promise<void> 
   const auth = req.headers.authorization ?? "";
   if (url.pathname === "/v2/sentiment-analysis/ja/result-parameters.json") {
     if (!auth.startsWith("Bearer ")) return sendJson(res, 401, { message: "unauthorized" });
-    return sendJson(res, 200, SENTIMENT_PARAMS.map(([name, label, min, max]) => ({ name, label, min, max })));
+    // 本物と同じ形（2026-11 に実際の API で確認）
+    return sendJson(res, 200, {
+      sentiment_analysis: {
+        result_parameters: {
+          display_language: "ja",
+          definitions: SENTIMENT_PARAMS.map(([name, display_name, minimum, maximum]) => ({ name, display_name, minimum, maximum })),
+        },
+      },
+    });
   }
   if (url.pathname === "/v2/recognitions" && req.method === "POST") {
     const body = await readBody(req);
