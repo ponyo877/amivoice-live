@@ -203,3 +203,11 @@ npm run build
 - 途中結果（U）には信頼度が付かないため、点線は確定した字幕にだけ付きます。
 - 感情解析の結果は、区間ごとに `starttime`・`endtime` と 20 個のパラメータ（`energy`・`stress`・`concentration`・`hesitation` など）の数値が並ぶ形で返ります。日本語名と値の範囲（例: `energy` は 0〜100、`atmosphere` は -100〜100）は、パラメータ一覧 API（`result-parameters.json`。認識と同じ `Authorization: Bearer` が必要）から引きます。振り返りのグラフは、この範囲で縦軸を描きます。
 - End to End エンジンはフィラーを常に取り除くため、フィラーの数は振り返り用のハイブリッドエンジンの結果から数えます。
+
+## ライセンス
+
+[MIT](LICENSE)
+
+評価に使う Irodori-TTS と Woosh のコードとモデルの重みは、このリポジトリに含みません。
+使うときは、それぞれのリポジトリのライセンスに従ってください（Woosh の重みは非商用に限られます）。
+模擬 LT の音声（`eval/data/`）も、リポジトリには入れていません。

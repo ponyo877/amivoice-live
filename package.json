@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "勉強会・LT会向けリアルタイム字幕。スライドから技術用語辞書を自動生成して AmiVoice API に渡す",
+  "license": "MIT",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
