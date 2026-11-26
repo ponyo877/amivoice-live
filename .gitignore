@@ -9,3 +9,4 @@ eval/data/
 eval/out/
 *.log
 .DS_Store
+eval/archive-say/

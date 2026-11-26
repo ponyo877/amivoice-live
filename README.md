@@ -96,19 +96,32 @@ npm run deploy
 
 ### 正解の分かる模擬 LT
 
-`eval/corpus/` に、技術用語の多い 3 本の模擬 LT（Cloudflare Workers・Rust の非同期・RAG の評価）の台本とスライドがあります。macOS の読み上げ（`say`）で音声を作るので、誰でも同じ音声を作り直せます。
+`eval/corpus/` に、技術用語の多い 3 本の模擬 LT（Cloudflare Workers・Rust の非同期・RAG の評価）の台本とスライドがあります。音声はローカルで動くモデルだけで作るので、誰でも同じ音声を作り直せます。
+
+- 読み上げは [Irodori-TTS](https://github.com/Aratako/Irodori-TTS)（`Aratako/Irodori-TTS-v4.1-Small`）です。台本の `# voice A: …` に書いた声の説明（VoiceDesign）から話者ごとに参照音声を作り、以後の文はその参照音声と説明を条件にして 1 文ずつ合成します。
+- 会場の想定の音声には、[Woosh](https://github.com/SonyResearch/Woosh)（Sony AI の効果音生成モデル、Woosh-Flow）で作った空調と客席の気配の環境音・拍手・咳・椅子のきしみを重ねます。
 
 ```sh
-node eval/corpus/build.ts   # eval/data/ に音声・正解・スライドの PDF を作る（say・sox・Google Chrome が必要）
+# Irodori-TTS（macOS は cpu の extra で MPS が使えます。NVIDIA GPU なら cu128）
+git clone https://github.com/Aratako/Irodori-TTS.git && (cd Irodori-TTS && uv sync --extra cpu)
+# Woosh（重みは GitHub の Releases から。テキストから音を作るのに必要な 3 つだけ）
+git clone https://github.com/SonyResearch/Woosh.git && cd Woosh && uv sync --extra cpu
+gh release download v1.0.0 --repo SonyResearch/woosh-sfx -p Woosh-Flow.zip -p TextConditionerA.zip -p Woosh-AE.zip
+unzip -o Woosh-Flow.zip && unzip -o TextConditionerA.zip && unzip -o Woosh-AE.zip && cd ..   # checkpoints/<名前>/ に展開される
+
+IRODORI_TTS_DIR=$PWD/Irodori-TTS WOOSH_DIR=$PWD/Woosh node eval/corpus/build.ts   # eval/data/ に音声・正解・スライドの PDF を作る（sox・Google Chrome も必要）
+node eval/corpus/build.ts --tts say   # モデルを入れずに手早く試すなら macOS の say（会場の音はピンクノイズ）
 ```
 
 - 英語の用語は、日本語話者が話すようにカタカナの読みで読み上げ、正解の書き起こしにはスライドと同じ綴りを使います（台本では `{Durable Objects|デュラブルオブジェクツ}` と書きます）。
 - 「えー」などのフィラーを混ぜて読み上げ、正解からは除きます。フィラーの数の正解が分かります。
 - 最後に別の声で質疑応答を入れます。話者の正解（誰がいつ話したか）が分かります。
-- 静かな部屋の音声（`<id>.wav`）に加えて、残響・帯域の制限・雑音を足した会場の想定（`<id>.venue.wav`）を作ります。
+- 静かな部屋の音声（`<id>.wav`）に加えて、残響・帯域の制限・会場の音を足した会場の想定（`<id>.venue.wav`）を作ります。登壇の終わりと質疑の後には拍手の間を空けます（静かな版では無音）。
 - 台本の読みをそのまま入れた「理想の辞書」（`<id>.oracle.dict.json`）も作ります。スライドから Claude が作った辞書（`node eval/dictionary.ts` で `<id>.slides.dict.json`）がどこまで迫るかを比べる上限の目安です。
+- 合成した音は `eval/data/.cache/` に残すので、台本を直したときは変わった文だけを作り直します。1 文の読み上げの速さが極端なとき（読み飛ばしや繰り返しの疑い）は、seed を変えて作り直します。
+- Woosh の公開の重みは CC BY-NC 4.0 です。作った音声は評価のためだけに使い、リポジトリには含めません。
 
-読み上げ音声は人の発話より認識しやすいので、数字は「同じ条件どうしの差」を見るためのものです。
+合成音声は人の発話より抑揚や言いよどみが少ないので、数字は「同じ条件どうしの差」を見るためのものです。
 
 ### クーポンの範囲で実験する
 
