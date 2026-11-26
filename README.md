@@ -38,6 +38,7 @@ flowchart LR
 - **AmiVoice 側にログを残さない接続先を使います。** WebSocket は `/v1/nolog/` に、非同期 HTTP API は `loggingOptOut=True` を付けて送ります。
 - **ライブ字幕とアーカイブを、同じ音声で比べます。** Durable Object は AmiVoice に送る PCM をそのまま R2 にマルチパートアップロードします。終了後のアーカイブはこの録音から作るので、両者の違いはエンジンと処理方式の違いだけになります。
 - **終了後の処理は Durable Object のアラームで進めます。** 録音を WAV にしてストリームのまま 2 つのジョブを出し、10 秒ごとに状態を見に行きます。
+- **月の使用量に上限を設けます。** 全部の勉強会をまたいで AmiVoice に送った音声の長さを 1 つの Durable Object で数え、`AMIVOICE_MONTHLY_LIMIT_HOURS`（既定 9 時間）に達したら配信を始めさせず、終了後のジョブも出しません。感情分析は別に課金されるので `AMIVOICE_SENTIMENT_LIMIT_MINUTES`（既定 55 分）で別に抑え、超えたら感情分析なしで振り返りを作ります。実際の課金は発話区間だけですが、送った長さ全体を数えて多めに見積もります。1 回の登壇で、ライブ・アーカイブ・振り返りの 3 回分（登壇の長さの 3 倍）を使います。
 
 | ジョブ | エンジン | 指定 | 使い道 |
 |---|---|---|---|
@@ -93,6 +94,26 @@ npm run deploy
 
 `eval/` には、字幕アプリと同じ条件（16kHz PCM を 100ms ごとに送信）で AmiVoice API に音声を流し、条件の組み合わせを比べるスクリプトがあります。
 
+### 正解の分かる模擬 LT
+
+`eval/corpus/` に、技術用語の多い 3 本の模擬 LT（Cloudflare Workers・Rust の非同期・RAG の評価）の台本とスライドがあります。macOS の読み上げ（`say`）で音声を作るので、誰でも同じ音声を作り直せます。
+
+```sh
+node eval/corpus/build.ts   # eval/data/ に音声・正解・スライドの PDF を作る（say・sox・Google Chrome が必要）
+```
+
+- 英語の用語は、日本語話者が話すようにカタカナの読みで読み上げ、正解の書き起こしにはスライドと同じ綴りを使います（台本では `{Durable Objects|デュラブルオブジェクツ}` と書きます）。
+- 「えー」などのフィラーを混ぜて読み上げ、正解からは除きます。フィラーの数の正解が分かります。
+- 最後に別の声で質疑応答を入れます。話者の正解（誰がいつ話したか）が分かります。
+- 静かな部屋の音声（`<id>.wav`）に加えて、残響・帯域の制限・雑音を足した会場の想定（`<id>.venue.wav`）を作ります。
+- 台本の読みをそのまま入れた「理想の辞書」（`<id>.oracle.dict.json`）も作ります。スライドから Claude が作った辞書（`node eval/dictionary.ts` で `<id>.slides.dict.json`）がどこまで迫るかを比べる上限の目安です。
+
+読み上げ音声は人の発話より認識しやすいので、数字は「同じ条件どうしの差」を見るためのものです。
+
+### クーポンの範囲で実験する
+
+`eval/stream.ts`・`eval/async.ts`・`scripts/smoke.ts` は、AmiVoice に送る前に音声の長さを台帳（`eval/usage.jsonl`）に記録し、月の合計が 9 時間（`AMIVOICE_BUDGET_HOURS`）を超えるなら実行しません。`--dry-run` で使用量の見積もりだけを出せます。`node eval/budget.ts` で月ごとの使用量を確かめられます。
+
 ```sh
 # 1. 音声（任意の形式。ffmpeg で変換します）、正解の書き起こし、辞書を用意する
 #    辞書は登壇者の画面で作ってから、/api/rooms/<id>/dictionary の JSON を保存するのが手軽です
@@ -106,6 +127,8 @@ AMIVOICE_API_KEY=... node eval/stream.ts --audio eval/data/talk.wav --dictionary
 AMIVOICE_API_KEY=... node eval/async.ts --audio eval/data/talk.wav --dictionary eval/data/talk.dict.json --matrix
 # 4. ライブと非同期をまとめて表にする
 node eval/score.ts --reference eval/data/talk.ref.txt --dictionary eval/data/talk.dict.json eval/out/talk.*.jsonl eval/out/talk.*.async.json
+# 模擬 LT は、3 本をまとめて条件ごとに集計する（話者の正しさとフィラーの数も正解と比べる）
+node eval/summarize.ts --json eval/results/summary.json
 ```
 
 出力する指標:
@@ -136,11 +159,12 @@ npm run build
 | `src/worker/room.ts` | 勉強会ごとの Durable Object（AmiVoice への中継、字幕の配信と保存、録音、終了後のジョブ） |
 | `src/worker/recording.ts` | R2 へのマルチパートアップロード（配信中に DO が再起動しても、送ったパートまでは回収できる） |
 | `src/worker/async-api.ts` | 非同期 HTTP API のクライアント（録音をストリームのまま送る） |
+| `src/worker/usage.ts` | 月ごとの使用量を数え、上限を超える配信やジョブを止める Durable Object |
 | `src/worker/terms.ts` | スライドからの用語抽出と、書き起こしからの辞書の提案（Claude の構造化出力） |
 | `src/client/` | 登壇者・参加者・振り返り・トップの各画面 |
 | `public/pcm-worklet.js` | 音声を 16kHz PCM にする AudioWorklet |
 | `scripts/mock-amivoice.ts` | AmiVoice のモックサーバ |
-| `eval/` | 精度と遅延の評価 |
+| `eval/` | 精度と遅延の評価（`corpus/` は模擬 LT、`budget.ts` はクーポンの台帳） |
 
 ## 制約
 
