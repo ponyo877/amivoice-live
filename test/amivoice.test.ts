@@ -11,6 +11,7 @@ import {
   parseServerEvent,
   parseStartParam,
   resultEndTime,
+  sharedReadings,
   type DictionaryTerm,
 } from "../src/shared/amivoice.ts";
 
@@ -40,6 +41,16 @@ test("カタカナ・半角カナの読みはひらがなに直して登録す�
   assert.equal(normalizeReading("ﾗﾝｸﾞﾗｰ"), "らんぐらー");
   assert.equal(normalizeReading("ヴィート"), "ゔぃーと");
   assert.equal(buildProfileWords([{ written: "Wrangler", readings: ["ラングラー"] }], "hybrid"), "Wrangler らんぐらー");
+});
+
+test("読みが同じで表記の違う語の組を見つける（大文字と小文字、空白だけの違いは同じ語）", () => {
+  const shared = sharedReadings([
+    { written: "MCP サーバー", readings: ["えむしーぴーさーばー"] },
+    { written: "Docker", readings: ["どっかー"] },
+    { written: "McpServer", readings: ["エムシーピーサーバー"] },
+    { written: "mcp_サーバー", readings: ["えむしーぴーさーばー"] },
+  ]);
+  assert.deepEqual(shared, [{ reading: "えむしーぴーさーばー", indices: [0, 2] }]);
 });
 
 test("読みはひらがなと長音記号だけを受け付ける", () => {

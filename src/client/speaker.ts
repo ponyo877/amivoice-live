@@ -1,7 +1,7 @@
 // 登壇者の画面。/speaker.html#room=<id>&token=<token> で開く（トークンはサーバのログに残らないよう # の後ろに置く）。
 
 import QRCode from "qrcode";
-import { ENGINES, isValidReading, normalizeReading, type DictionaryTerm } from "../shared/amivoice.ts";
+import { ENGINES, isValidReading, normalizeReading, sharedReadings, type DictionaryTerm } from "../shared/amivoice.ts";
 import type { LiveStats, ServerMessage, TalkSummary, UsageStatus } from "../shared/protocol.ts";
 import { listMicrophones, startCapture, type AudioSourceKind, type Capture } from "./audio.ts";
 import { CaptionView } from "./captions.ts";
@@ -294,16 +294,25 @@ function setDictStatus(text: string, isError = false): void {
   dictStatus.classList.toggle("is-error", isError);
 }
 
+const dictWarning = $("dict-warning");
+let readingInputs: HTMLInputElement[] = [];
+
 function renderTerms(): void {
   termsBody.replaceChildren();
+  readingInputs = [];
   terms.forEach((t, i) => {
     const tr = document.createElement("tr");
-    const written = cellInput(t.written, "表記", (v) => (terms[i]!.written = v));
+    const written = cellInput(t.written, "表記", (v) => {
+      terms[i]!.written = v;
+      markSharedReadings();
+    });
     const readings = cellInput(t.readings.join("、"), "読み", (v) => {
       terms[i]!.readings = v.split(/[、,，\s]+/).filter(Boolean);
       markReadings(readings.input, terms[i]!.readings);
+      markSharedReadings();
     });
     markReadings(readings.input, t.readings);
+    readingInputs.push(readings.input);
     const source = document.createElement("td");
     source.className = "source";
     source.textContent = t.source ?? "";
@@ -322,6 +331,19 @@ function renderTerms(): void {
     termsBody.append(tr);
   });
   $("term-count").textContent = String(terms.length);
+  markSharedReadings();
+}
+
+/** 同じ読みの語があると、どちらの表記が字幕に出るかはエンジン次第になるので、欄に印を付けて組を文で示す。 */
+function markSharedReadings(): void {
+  const shared = sharedReadings(terms);
+  const marked = new Set(shared.flatMap((s) => s.indices));
+  readingInputs.forEach((input, i) => input.toggleAttribute("data-shared", marked.has(i)));
+  dictWarning.textContent = shared.length
+    ? `同じ読みの語があります（${shared
+        .map((s) => `${s.reading}: ${s.indices.map((i) => terms[i]!.written || "（表記なし）").join(" と ")}`)
+        .join("、")}）。どちらの表記が字幕に出るかはエンジン次第なので、片方を消すか、読みを変えてください。`
+    : "";
 }
 
 /** ハイブリッドエンジンは読みのない語を使えないので、読みが空か、ひらがなに直せない文字を含む行を赤くする。 */

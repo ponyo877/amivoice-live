@@ -771,6 +771,16 @@ body.console {
   background: #fff5f5;
 }
 
+/* 同じ読みの語（どちらが字幕に出るかはエンジン次第）。組は表の上の文で示す */
+.terms input[data-shared] {
+  border-color: #b26a00;
+  background: #fff8e6;
+}
+
+.status.is-warning:not(:empty) {
+  color: #8a5200;
+}
+
 .dictionary-actions {
   display: flex;
   justify-content: flex-end;

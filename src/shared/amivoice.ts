@@ -74,6 +74,25 @@ export function normalizeReading(reading: string): string {
     .replace(/[\s・]/gu, "");
 }
 
+/**
+ * 読みが同じで表記の違う語の組。ハイブリッドエンジンは読みで音を照合するので、同じ読みの語が 2 つあると、
+ * どちらの表記が字幕に出るかはエンジン次第になる（例: 記事のコードから拾った McpServer と、本文の MCP サーバー）。
+ * 大文字と小文字、空白だけが違う表記は同じ語とみなす。
+ */
+export function sharedReadings(terms: DictionaryTerm[]): { reading: string; indices: number[] }[] {
+  const sameWord = (w: string) => w.normalize("NFKC").toLowerCase().replace(/[\s_]/g, "");
+  const byReading = new Map<string, number[]>();
+  terms.forEach((t, i) => {
+    for (const r of new Set(t.readings.map(normalizeReading).filter(Boolean))) {
+      const list = byReading.get(r) ?? [];
+      // 同じ語の重複は数えない
+      if (!list.some((j) => sameWord(terms[j]!.written) === sameWord(t.written))) list.push(i);
+      byReading.set(r, list);
+    }
+  });
+  return [...byReading].filter(([, indices]) => indices.length > 1).map(([reading, indices]) => ({ reading, indices }));
+}
+
 /** 表記に使えない文字（| とスペースは区切り、: は予約、" は s コマンドの引用符）。 */
 export function isRegistrableWritten(written: string): boolean {
   return written.trim().length > 0 && !/[|:"]/.test(written);
