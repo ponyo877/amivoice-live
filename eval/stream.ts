@@ -43,6 +43,8 @@ export interface StreamOptions {
   segmenter?: Record<string, string | number>;
   /** E2E エンジンの単語強調の強調度（0〜1） */
   emphasis?: number;
+  /** 認識を始められた（s が成功した）直後、音声を送る前に呼ぶ。例外を投げたら送らずにやめる */
+  onStarted?: () => void;
 }
 
 export interface StreamRecord {
@@ -93,7 +95,13 @@ export async function streamOnce(opts: StreamOptions): Promise<{ records: Stream
     ws.onerror = () => rej(new Error("AmiVoice に接続できませんでした"));
   });
   ws.send(command); // API キーを含むので出力しない
-  await startedP;
+  try {
+    await startedP;
+    opts.onStarted?.();
+  } catch (err) {
+    ws.close();
+    throw err;
+  }
 
   t0 = Date.now();
   for (let off = 0, i = 0; off < opts.pcm.length; off += CHUNK_BYTES, i++) {
@@ -197,7 +205,8 @@ async function main(): Promise<void> {
   const queue = [...runs];
   const worker = async () => {
     for (let run = queue.shift(); run; run = queue.shift()) {
-      if (counted) reserve({ api: "websocket", engine: run.engine, seconds: audioSeconds, label: `stream ${stem} ${describe(run)}` });
+      // 認識を始められなければ音声は送らない（課金されない）ので、始められてから記録する
+      const onStarted = counted ? () => reserve({ api: "websocket", engine: run.engine, seconds: audioSeconds, label: `stream ${stem} ${describe(run)}` }) : undefined;
       const segmenter: Record<string, string | number> = {};
       if (run.postTime !== undefined) segmenter.postTime = run.postTime;
       if (values.diarization) segmenter.useDiarizer = 1;
@@ -210,6 +219,7 @@ async function main(): Promise<void> {
         speed,
         segmenter: Object.keys(segmenter).length ? segmenter : undefined,
         emphasis: run.emphasis,
+        onStarted,
       });
       mkdirSync(dirname(run.out), { recursive: true });
       const header = {
