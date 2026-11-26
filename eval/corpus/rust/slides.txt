@@ -1,0 +1,40 @@
+# Rust の非同期処理でデッドロックを踏んだ話
+LT / ログ収集エージェント開発記
+---
+# 作っているもの
+- ログを集めて送るエージェント
+- Tokio / axum / serde
+---
+# その 1: Mutex を持ったまま .await
+```
+let state = Arc::new(Mutex::new(State::default()));
+```
+- ロック中に .await → 他のタスクが待ち続ける
+- Clippy の await_holding_lock を無視していた
+---
+# その 2: ランタイムで重い計算
+- 圧縮処理がワーカースレッドを占有
+- tokio::task::spawn_blocking に逃がす
+---
+# その 3: select! とキャンセル
+- 複数の Future を待つ
+- 負けた側は drop される
+- キャンセル安全でない処理でデータが消えた
+---
+# 調べ方
+- tokio-console でタスクの待ちを見る
+- tracing のスパンにタスク名
+---
+# 型が守ってくれる
+- 別スレッドに渡す Future は Send が必要
+- MutexGuard を持ったままの .await はコンパイルエラーに
+- borrow checker に感謝
+---
+# 依存の管理
+- crates.io / Cargo workspace
+- 使わない feature は切る
+---
+# まとめ
+- ロックを持ったまま待たない
+- 重い処理は spawn_blocking
+- キャンセル安全に書く

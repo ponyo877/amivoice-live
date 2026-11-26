@@ -1,0 +1,43 @@
+# Cloudflare Workers で勉強会のリアルタイムチャットを作って分かったこと
+LT / 勉強会チャットの裏側
+---
+# やりたかったこと
+- 勉強会の参加者がチャットでつながる
+- 使うのは月に数時間だけ
+- 常時起動のサーバーは持ちたくない
+---
+# Durable Objects
+- 名前ごとに世界で一つだけのオブジェクト
+- 勉強会 = 1 オブジェクト
+- 全員の WebSocket がここに集まる
+---
+# Hibernation API
+- 接続を張ったままメモリから退避
+- 待機中は課金されない
+```
+this.ctx.acceptWebSocket(ws);
+```
+---
+# 組み込みの SQLite
+- 発言の履歴をテーブルに保存
+- 途中参加の人にも過去ログを返す
+```
+this.ctx.storage.sql.exec("SELECT * FROM messages");
+```
+---
+# ハマりどころ
+- blockConcurrencyWhile の中で fetch を待たない
+- 後片付けは Cron Triggers ではなく setAlarm
+- アラームはオブジェクトごとに一つ
+---
+# 開発環境
+- Wrangler + Miniflare
+- Vite（@cloudflare/vite-plugin）
+- Hono / Vitest / TypeScript
+---
+# ストレージの使い分け
+- R2: 添付ファイル・録画（転送量の料金なし）
+- D1: 集計・部屋の一覧
+---
+# まとめ
+- Durable Objects + Hibernation API で、ほぼ無料のリアルタイム基盤
