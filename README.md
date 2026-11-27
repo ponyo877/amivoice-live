@@ -2,6 +2,8 @@
 
 勉強会・LT 会の登壇を、リアルタイムに字幕にする Web アプリです。
 
+作った経緯と、辞書の効き目を測った実験は Zenn の記事にまとめています: [LT のライブ字幕を、登壇前のスライドで技術用語に強くする（AmiVoice API）](https://zenn.dev/ponyo877/articles/117c1fc0728161)
+
 ![登壇者の画面で字幕が流れる様子（模擬 LT の音声ファイルを流したところ）](docs/zenn/images/live.gif)
 
 - 登壇スライドの PDF から、誤認識されやすい技術用語とその読みを Claude が抜き出し、AmiVoice API のユーザー辞書（`profileWords`）に登録します。

@@ -3,7 +3,7 @@ title: "LT のライブ字幕を、登壇前のスライドで技術用語に強
 emoji: "🎙️"
 type: "tech"
 topics: ["amivoice", "音声認識", "cloudflare", "durableobjects", "claude"]
-published: false
+published: true
 ---
 
 勉強会や LT 会の登壇に、リアルタイムで字幕を付けたいと思いました。
