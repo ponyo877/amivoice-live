@@ -46,6 +46,8 @@ async function createRoom(request: Request, env: Env, url: URL): Promise<Respons
 async function roomRoute(request: Request, env: Env, roomId: string, sub: string, url: URL): Promise<Response> {
   const stub = env.ROOM.getByName(roomId);
   if (!(await stub.exists())) return json({ error: "ルームが見つかりません" }, 404);
+  // 参加者の画面が、つながらない理由がルームの不在かどうかを確かめるのに使う
+  if (sub === "" && request.method === "GET") return json({ ok: true });
 
   if (sub === "/ws") {
     const role = url.searchParams.get("role") === "speaker" ? "speaker" : "viewer";

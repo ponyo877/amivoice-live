@@ -124,16 +124,36 @@ if (!roomId) {
   $("empty-text").textContent = "URL にルームの指定がありません。登壇者から共有された QR コードか URL を開いてください。";
   setNetState("error", "ルームの指定がありません");
 } else {
-  new LiveSocket({
+  // 一度もつながらないうちに切れたら、ルームがあるかを 1 回だけ確かめる。無ければつなぎ直さずにそう伝える
+  let opened = false;
+  let checked = false;
+  let missing = false;
+  const socket: LiveSocket = new LiveSocket({
     url: wsUrl(`/api/rooms/${encodeURIComponent(roomId)}/ws?role=viewer`),
     onOpen: () => {
+      opened = true;
       connection.hidden = true;
       setNetState("open", "つながっています");
     },
     onClose: ({ willRetry }) => {
+      if (missing) return;
       connection.hidden = false;
       connection.textContent = willRetry ? "接続が切れました。つなぎ直しています…" : "接続できませんでした。URL を確かめてください。";
       setNetState(willRetry ? "retry" : "error", willRetry ? "つなぎ直しています" : "つなげません");
+      if (opened || checked) return;
+      checked = true;
+      void fetch(`/api/rooms/${encodeURIComponent(roomId)}`)
+        .then((res) => {
+          if (res.status !== 404) return;
+          missing = true;
+          socket.close();
+          connection.textContent = "このルームは見つかりません。URL を確かめてください。";
+          setNetState("error", "ルームが見つかりません");
+          $("empty-text").textContent = "このルームは見つかりません。登壇者から共有された QR コードか URL を開き直してください。";
+        })
+        .catch(() => {
+          // 確かめられないときは、つなぎ直しを続ける
+        });
     },
     onMessage: (msg) => {
       captions.handle(msg);
