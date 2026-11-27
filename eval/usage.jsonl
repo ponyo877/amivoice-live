@@ -151,3 +151,4 @@
 {"at":"2026-11-27T12:40:34.631Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":30,"label":"smoke probe.wav"}
 {"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"label":"smoke probe.wav アーカイブ"}
 {"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"sentiment":true,"label":"smoke probe.wav 振り返り"}
+{"at":"2026-11-27T14:37:20.935Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":24,"label":"記事の GIF（rust.wav の冒頭 24 秒、ライブ字幕のみ）"}
