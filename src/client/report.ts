@@ -6,13 +6,17 @@ import type { DictionaryTerm } from "../shared/amivoice.ts";
 import type { TalkReport } from "../shared/async-result.ts";
 import type { CaptionLine, TalkDetail } from "../shared/protocol.ts";
 import { speakerName } from "./captions.ts";
+import { setupThemeToggle } from "./ui.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+setupThemeToggle($<HTMLButtonElement>("app-theme"));
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const roomId = hash.get("room") ?? "";
 const talkId = Number(hash.get("talk") ?? "0");
 const token = hash.get("token") ?? localStorage.getItem(`speaker-token:${roomId}`) ?? "";
+if (roomId && token) $<HTMLAnchorElement>("back").href = `/speaker.html#room=${encodeURIComponent(roomId)}&token=${encodeURIComponent(token)}`;
 if (!roomId || !talkId || !token) {
   $("title").textContent = "登壇を開けませんでした";
   $("progress").hidden = false;

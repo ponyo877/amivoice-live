@@ -4,134 +4,313 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>登壇者の画面 | amivoice-live</title>
+    <script>
+      document.documentElement.dataset.theme =
+        localStorage.getItem("app-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/client/styles.css" />
   </head>
-  <body class="console">
-    <header class="console-bar">
-      <a class="wordmark" href="/">amivoice-live</a>
-      <h1 class="console-title" id="title">読み込み中…</h1>
-      <span class="tally" id="tally" data-live="false">
-        <span class="tally-dot" aria-hidden="true"></span>
-        <span id="tally-text">待機中</span>
-      </span>
+  <body class="app speaker">
+    <header class="app-nav">
+      <a class="brand" href="/"><svg class="i logo" aria-hidden="true"><use href="/icons.svg#logo" /></svg><span>amivoice-live</span></a>
+      <div class="tabs" role="tablist" aria-label="登壇者の画面">
+        <button type="button" role="tab" id="tab-live" aria-controls="view-live" aria-selected="true">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#broadcast" /></svg>配信
+        </button>
+        <button type="button" role="tab" id="tab-dict" aria-controls="view-dict" aria-selected="false" tabindex="-1">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#book" /></svg>辞書<span class="count" id="term-count-tab">0</span>
+        </button>
+        <button type="button" role="tab" id="tab-talks" aria-controls="view-talks" aria-selected="false" tabindex="-1">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#history" /></svg>記録<span class="count" id="talk-count">0</span>
+        </button>
+      </div>
+      <div class="app-nav-end">
+        <span class="usage-pill" id="usage-pill" title="今月の AmiVoice API の残り時間（全部のルームの合計）">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#clock" /></svg><span id="usage-left">–</span>
+        </span>
+        <button type="button" class="btn icon ghost" id="app-theme"><svg class="i" aria-hidden="true"><use href="/icons.svg#moon" /></svg></button>
+      </div>
     </header>
 
-    <div class="console-grid">
-      <aside class="panel controls" aria-label="配信の操作">
-        <section class="group">
-          <h2>音声</h2>
-          <label class="field">
-            <span>入力</span>
-            <select id="source">
-              <option value="mic">マイク</option>
-              <option value="tab">ブラウザのタブの音声</option>
-              <option value="file">音声ファイル</option>
-            </select>
-          </label>
-          <label class="field" id="mic-field">
-            <span>マイク</span>
-            <select id="mic"><option value="">既定のマイク</option></select>
-          </label>
-          <label class="field" id="file-field" hidden>
-            <span>ファイル</span>
-            <input type="file" id="audio-file" accept="audio/*,video/*" />
-          </label>
-          <label class="field">
-            <span>認識エンジン</span>
-            <select id="engine"></select>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="use-dictionary" checked />
-            <span>辞書を使う（<span id="term-count">0</span> 語）</span>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="diarization" />
-            <span>話者を色分けする（質疑応答向け）</span>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="archive" checked />
-            <span>録音して、終了後にアーカイブ字幕と振り返りを作る</span>
-          </label>
-          <div class="meter" aria-hidden="true"><div class="meter-fill" id="meter"></div></div>
-          <button type="button" class="button primary" id="toggle">配信を始める</button>
-          <p class="status" id="status" role="status"></p>
-        </section>
-
-        <section class="group">
-          <h2>参加者に共有</h2>
-          <canvas id="qr" width="168" height="168" aria-label="参加者用の字幕ページの QR コード"></canvas>
-          <div class="share-row">
-            <input type="text" id="viewer-url" readonly aria-label="参加者用の URL" />
-            <button type="button" class="button" id="copy">コピー</button>
+    <main class="app-main">
+      <!-- 配信 -->
+      <section class="live-view" id="view-live" role="tabpanel" aria-labelledby="tab-live">
+        <div class="card room-card">
+          <div class="room-status">
+            <span class="status-icon" id="net-state" data-state="connecting" title="サーバにつないでいます" role="img" aria-label="サーバにつないでいます">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#wifi" /></svg>
+            </span>
+            <span class="status-icon" id="mic-state" data-state="off" title="マイクは止まっています" role="img" aria-label="マイクは止まっています">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#mic-off" /></svg>
+            </span>
           </div>
-          <p class="hint"><a id="overlay-link" target="_blank" rel="noopener">プロジェクター・OBS 用の表示</a>を開くと、背景が透明な字幕になります。</p>
-          <p class="hint"><span id="viewers">0</span> 人が字幕を見ています。</p>
-        </section>
-
-        <section class="group">
-          <h2>計測</h2>
-          <dl class="stats">
-            <div><dt>話し終わりから確定まで</dt><dd id="stat-finalize">–</dd></div>
-            <div><dt>音声に対する確定の遅れ</dt><dd id="stat-lag">–</dd></div>
-            <div><dt>確定した発話</dt><dd id="stat-count">0</dd></div>
-            <div><dt>送った音声</dt><dd id="stat-audio">0:00</dd></div>
-            <div><dt>今月の AmiVoice の使用量</dt><dd id="stat-usage">–</dd></div>
-          </dl>
-          <p class="hint">字幕を書き出す: <a id="export-md" target="_blank">Markdown</a>・<a id="export-vtt" target="_blank">WebVTT</a>・<a id="export-json" target="_blank">JSON</a></p>
-        </section>
-      </aside>
-
-      <section class="panel preview" aria-label="字幕のプレビュー">
-        <div class="caption-stage" id="stage">
-          <p class="caption-empty" id="empty">「配信を始める」を押して話すと、参加者と同じ字幕がここに出ます。</p>
+          <div class="room-id">
+            <h1 id="title">読み込み中…</h1>
+            <p>
+              <span class="tally" id="tally" data-live="false"><span class="tally-dot" aria-hidden="true"></span><span id="tally-text">待機中</span></span>
+              <span>ルーム ID <code id="room-code"></code></span>
+            </p>
+          </div>
+          <div class="room-tools">
+            <button type="button" class="btn icon ghost" id="present" title="プレゼン表示（F）" aria-label="プレゼン表示（F）" aria-keyshortcuts="F">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#screen" /></svg>
+            </button>
+            <button type="button" class="btn icon ghost" id="continuous" title="書き起こし表示（T）" aria-label="書き起こし表示（T）" aria-keyshortcuts="T">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#lines" /></svg>
+            </button>
+          </div>
         </div>
-        <button type="button" class="jump" id="jump" hidden>最新の字幕へ</button>
+
+        <section class="card preview-card" id="preview" aria-label="字幕のプレビュー">
+          <div class="caption-stage" id="stage">
+            <div class="caption-empty" id="empty">
+              <span class="empty-icon"><svg class="i" aria-hidden="true"><use href="/icons.svg#mic" /></svg></span>
+              <p>「配信を始める」を押して話すと、<br />参加者と同じ字幕がここに出ます</p>
+            </div>
+          </div>
+          <button type="button" class="jump" id="jump" hidden>
+            <svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-down" /></svg>最新の字幕へ
+          </button>
+          <div class="meter" aria-hidden="true"><div class="meter-fill" id="meter"></div></div>
+          <div class="present-tools" id="present-tools">
+            <span class="label" id="present-label">プレゼン表示</span>
+            <button type="button" class="btn icon sm ghost" id="present-smaller" aria-label="文字を小さくする">A<small>−</small></button>
+            <button type="button" class="btn icon sm ghost" id="present-larger" aria-label="文字を大きくする">A<small>＋</small></button>
+            <button type="button" class="btn icon sm ghost" id="present-exit" aria-label="全画面を閉じる（Esc）">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#minimize" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <div class="control-row">
+          <div class="control-start">
+            <span class="chip" title="この登壇の経過時間"><svg class="i" aria-hidden="true"><use href="/icons.svg#clock" /></svg><span id="elapsed">0:00</span></span>
+          </div>
+          <div class="control-center">
+            <button type="button" class="btn input-button" id="input-button" popovertarget="settings-pop" aria-label="音声の入力と設定">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#mic" /></svg><span id="input-label">マイク</span>
+              <svg class="i chevron" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg>
+            </button>
+            <button type="button" class="btn primary lg" id="toggle">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#play" /></svg><span id="toggle-text">配信を始める</span>
+            </button>
+          </div>
+          <div class="control-end">
+            <button type="button" class="btn icon" popovertarget="share-pop" title="参加者に共有" aria-label="参加者に共有">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#link" /></svg>
+            </button>
+            <button type="button" class="btn icon" popovertarget="people-pop" title="参加者" aria-label="参加者">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#users" /></svg><span class="count" id="viewers-badge">0</span>
+            </button>
+            <button type="button" class="btn icon" popovertarget="monitor-pop" title="計測と書き出し" aria-label="計測と書き出し">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#chart" /></svg>
+            </button>
+            <button type="button" class="btn icon" popovertarget="settings-pop" title="設定" aria-label="設定">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#sliders" /></svg>
+            </button>
+          </div>
+        </div>
+        <p class="status live-status" id="status" role="status"></p>
+        <p class="live-help">
+          <span><kbd>F</kbd> プレゼン表示</span><span><kbd>T</kbd> 書き起こし表示</span><span><kbd>Esc</kbd> 全画面を閉じる</span>
+        </p>
       </section>
+
+      <!-- 辞書 -->
+      <section class="view" id="view-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+        <div class="view-head">
+          <div>
+            <h1>辞書</h1>
+            <p class="lede">スライドの PDF か資料のテキストから、誤認識されやすい語と読みを Claude が抜き出します。表で直してから保存すると、配信中でも数秒で新しい辞書に切り替わります。</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn" id="add-term"><svg class="i" aria-hidden="true"><use href="/icons.svg#plus" /></svg>語を追加</button>
+            <button type="button" class="btn primary" id="save-dict"><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>辞書を保存</button>
+          </div>
+        </div>
+        <div class="card dict-source">
+          <label class="dropzone">
+            <input type="file" id="pdf" accept="application/pdf" />
+            <svg class="i" aria-hidden="true"><use href="/icons.svg#upload" /></svg>
+            <strong id="pdf-name">スライドの PDF を選ぶ</strong>
+            <span>ここにドロップしても選べます</span>
+          </label>
+          <div class="dict-text">
+            <label class="field">
+              <span>または資料のテキスト</span>
+              <textarea id="source-text" rows="4" placeholder="登壇の概要やスライドの文字を貼り付け"></textarea>
+            </label>
+            <button type="button" class="btn primary" id="extract"><svg class="i" aria-hidden="true"><use href="/icons.svg#sparkles" /></svg>語を抜き出す</button>
+          </div>
+        </div>
+        <p class="status" id="dict-status" role="status"></p>
+        <p class="status is-warning" id="dict-warning" role="status"></p>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="terms">
+              <thead>
+                <tr><th scope="col">表記</th><th scope="col">読み（かなで。複数は「、」区切り）</th><th scope="col">出現箇所</th><th scope="col"><span class="visually-hidden">操作</span></th></tr>
+              </thead>
+              <tbody id="terms-body"></tbody>
+            </table>
+            <p class="terms-empty" id="terms-empty">まだ語がありません。スライドから抜き出すか、「語を追加」で入れてください。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 記録 -->
+      <section class="view" id="view-talks" role="tabpanel" aria-labelledby="tab-talks" hidden>
+        <div class="view-head">
+          <div>
+            <h1>登壇の記録</h1>
+            <p class="lede">「配信を始める」から「配信を終える」までが 1 回の登壇です。録音した登壇は、終了後に AmiVoice の非同期 API で認識し直してアーカイブ字幕を作り、話す速さ、フィラー、感情の起伏の振り返りをまとめます。</p>
+          </div>
+        </div>
+        <ol class="talk-list" id="talk-list"></ol>
+        <div class="empty-card" id="talks-empty">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#history" /></svg>
+          <p>まだ登壇の記録はありません。<br />配信を終えると、ここに並びます。</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- 参加者に共有 -->
+    <div class="popover" id="share-pop" popover aria-labelledby="share-heading">
+      <div class="pop-head">
+        <h2 id="share-heading">参加者に共有</h2>
+        <button type="button" class="btn icon sm ghost" popovertarget="share-pop" popovertargetaction="hide" aria-label="閉じる"><svg class="i" aria-hidden="true"><use href="/icons.svg#x" /></svg></button>
+      </div>
+      <div class="tabs full" role="tablist" aria-label="共有の方法">
+        <button type="button" role="tab" id="share-tab-qr" aria-controls="share-qr" aria-selected="true">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#qr" /></svg>QR とリンク
+        </button>
+        <button type="button" role="tab" id="share-tab-obs" aria-controls="share-obs" aria-selected="false" tabindex="-1">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#screen" /></svg>投影・OBS
+        </button>
+      </div>
+      <div class="popover-panel" id="share-qr" role="tabpanel" aria-labelledby="share-tab-qr">
+        <div class="share-grid">
+          <div class="qr-box"><canvas id="qr" width="320" height="320" aria-label="参加者用の字幕ページの QR コード"></canvas></div>
+          <div class="share-options">
+            <fieldset class="presets">
+              <legend>参加者の画面の配色</legend>
+              <label class="preset" data-theme="dark"><input type="radio" name="share-theme" value="dark" checked /><span class="preset-swatch"><span>字幕</span></span>暗い</label>
+              <label class="preset" data-theme="light"><input type="radio" name="share-theme" value="light" /><span class="preset-swatch"><span>字幕</span></span>明るい</label>
+            </fieldset>
+            <label class="switch-row">
+              <span>フォーカス表示<small>字幕だけを画面いっぱいに出す</small></span>
+              <input type="checkbox" class="switch" id="share-focus" />
+            </label>
+          </div>
+        </div>
+        <label class="field">
+          <span>共有するリンク</span>
+          <input type="text" class="mono" id="viewer-url" readonly />
+        </label>
+        <div class="pop-actions">
+          <button type="button" class="btn primary" id="copy"><svg class="i" aria-hidden="true"><use href="/icons.svg#copy" /></svg><span>リンクをコピー</span></button>
+          <button type="button" class="btn" id="download-qr"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>QR を保存</button>
+        </div>
+      </div>
+      <div class="popover-panel" id="share-obs" role="tabpanel" aria-labelledby="share-tab-obs" hidden>
+        <fieldset class="presets">
+          <legend>字幕の見た目</legend>
+          <label class="preset" data-theme="transparent-dark"><input type="radio" name="obs-theme" value="transparent-dark" checked /><span class="preset-swatch"><span>字幕</span></span>透過・黒帯</label>
+          <label class="preset" data-theme="transparent-light"><input type="radio" name="obs-theme" value="transparent-light" /><span class="preset-swatch"><span>字幕</span></span>透過・白帯</label>
+          <label class="preset" data-theme="dark"><input type="radio" name="obs-theme" value="dark" /><span class="preset-swatch"><span>字幕</span></span>暗い</label>
+          <label class="preset" data-theme="light"><input type="radio" name="obs-theme" value="light" /><span class="preset-swatch"><span>字幕</span></span>明るい</label>
+        </fieldset>
+        <p class="hint">OBS では「ブラウザ」ソースにこのリンクを入れ、幅 1920、高さ 1080 にします。プロジェクターでは、別の画面でこのリンクを全画面で開きます。透過の見た目は、最新の 2 行だけを帯に乗せて出します。</p>
+        <label class="field">
+          <span>投影・OBS 用のリンク</span>
+          <input type="text" class="mono" id="overlay-url" readonly />
+        </label>
+        <div class="pop-actions">
+          <button type="button" class="btn primary" id="copy-overlay"><svg class="i" aria-hidden="true"><use href="/icons.svg#copy" /></svg><span>リンクをコピー</span></button>
+          <a class="btn" id="overlay-link" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg>開く</a>
+        </div>
+      </div>
     </div>
 
-    <section class="panel talks" aria-labelledby="talks-heading">
-      <div class="talks-head">
-        <h2 id="talks-heading">登壇の記録</h2>
-        <p class="hint">「配信を始める」から「止める」までが 1 回の登壇です。録音した登壇は、終了後に AmiVoice の非同期 API で認識し直してアーカイブ字幕を作り、話す速さ・フィラー・感情の起伏の振り返りをまとめます。</p>
+    <!-- 参加者 -->
+    <div class="popover" id="people-pop" popover aria-labelledby="people-heading">
+      <div class="pop-head">
+        <h2 id="people-heading">参加者</h2>
+        <button type="button" class="btn icon sm ghost" popovertarget="people-pop" popovertargetaction="hide" aria-label="閉じる"><svg class="i" aria-hidden="true"><use href="/icons.svg#x" /></svg></button>
       </div>
-      <ol class="talk-list" id="talk-list"></ol>
-      <p class="hint" id="talks-empty">まだ登壇の記録はありません。</p>
-    </section>
+      <p class="people-count"><strong id="viewers">0</strong>人が字幕を見ています</p>
+      <p class="hint">参加者は名前もアカウントもなしで字幕を見られます。人数は、字幕のページを開いている端末の数です（投影や OBS の画面も 1 人に数えます）。</p>
+      <button type="button" class="btn" popovertarget="share-pop"><svg class="i" aria-hidden="true"><use href="/icons.svg#link" /></svg>参加者を招く</button>
+    </div>
 
-    <section class="panel dictionary" aria-labelledby="dict-heading">
-      <div class="dictionary-head">
-        <h2 id="dict-heading">辞書</h2>
-        <p class="hint">スライドの PDF か資料のテキストから、誤認識されやすい語と読みを Claude が抜き出します。表で直してから保存してください。配信中に保存すると、数秒で新しい辞書に切り替わります。</p>
+    <!-- 計測 -->
+    <div class="popover" id="monitor-pop" popover aria-labelledby="monitor-heading">
+      <div class="pop-head">
+        <h2 id="monitor-heading">計測と書き出し</h2>
+        <button type="button" class="btn icon sm ghost" popovertarget="monitor-pop" popovertargetaction="hide" aria-label="閉じる"><svg class="i" aria-hidden="true"><use href="/icons.svg#x" /></svg></button>
       </div>
-      <div class="dictionary-input">
-        <label class="field">
-          <span>スライドの PDF</span>
-          <input type="file" id="pdf" accept="application/pdf" />
+      <dl class="stats">
+        <div><dt>話し終わりから確定まで</dt><dd id="stat-finalize">–</dd></div>
+        <div><dt>音声に対する確定の遅れ</dt><dd id="stat-lag">–</dd></div>
+        <div><dt>確定した発話</dt><dd id="stat-count">0</dd></div>
+        <div><dt>送った音声</dt><dd id="stat-audio">0:00</dd></div>
+        <div class="wide"><dt>今月の AmiVoice API の使用量（全部のルームの合計）</dt><dd id="stat-usage">–</dd></div>
+      </dl>
+      <div class="field">
+        <span>このルームの字幕を書き出す</span>
+        <div class="link-row">
+          <a class="btn sm" id="export-md" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>Markdown</a>
+          <a class="btn sm" id="export-vtt" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>WebVTT</a>
+          <a class="btn sm" id="export-json" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>JSON</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設定 -->
+    <div class="popover" id="settings-pop" popover aria-labelledby="settings-heading">
+      <div class="pop-head">
+        <h2 id="settings-heading">設定</h2>
+        <button type="button" class="btn icon sm ghost" popovertarget="settings-pop" popovertargetaction="hide" aria-label="閉じる"><svg class="i" aria-hidden="true"><use href="/icons.svg#x" /></svg></button>
+      </div>
+      <label class="field">
+        <span>音声の入力</span>
+        <select id="source">
+          <option value="mic">マイク</option>
+          <option value="tab">ブラウザのタブの音声</option>
+          <option value="file">音声ファイル</option>
+        </select>
+      </label>
+      <label class="field" id="mic-field">
+        <span>マイク</span>
+        <select id="mic"><option value="">既定のマイク</option></select>
+      </label>
+      <label class="field" id="file-field" hidden>
+        <span>音声ファイル<small>（実時間で流します）</small></span>
+        <input type="file" id="audio-file" accept="audio/*,video/*" />
+      </label>
+      <label class="field">
+        <span>認識エンジン</span>
+        <select id="engine"></select>
+      </label>
+      <div class="switch-list">
+        <label class="switch-row">
+          <span>辞書を使う<small>いまの辞書: <span id="term-count">0</span> 語</small></span>
+          <input type="checkbox" class="switch" id="use-dictionary" checked />
         </label>
-        <label class="field grow">
-          <span>または資料のテキスト</span>
-          <textarea id="source-text" rows="3" placeholder="登壇の概要やスライドの文字を貼り付け"></textarea>
+        <label class="switch-row">
+          <span>話者を色分けする<small>質疑応答で、話し手ごとに色の帯を付ける</small></span>
+          <input type="checkbox" class="switch" id="diarization" />
         </label>
-        <button type="button" class="button" id="extract">語を抜き出す</button>
+        <label class="switch-row">
+          <span>録音してアーカイブを作る<small>終了後に字幕を作り直し、振り返りをまとめる</small></span>
+          <input type="checkbox" class="switch" id="archive" checked />
+        </label>
       </div>
-      <p class="status" id="dict-status" role="status"></p>
-      <p class="status is-warning" id="dict-warning" role="status"></p>
-      <div class="table-wrap">
-        <table class="terms">
-          <thead>
-            <tr><th scope="col">表記</th><th scope="col">読み（かなで。複数は「、」区切り）</th><th scope="col">出現箇所</th><th scope="col"><span class="visually-hidden">操作</span></th></tr>
-          </thead>
-          <tbody id="terms-body"></tbody>
-        </table>
-      </div>
-      <div class="dictionary-actions">
-        <button type="button" class="button" id="add-term">語を追加</button>
-        <button type="button" class="button primary" id="save-dict">辞書を保存</button>
-      </div>
-    </section>
+    </div>
 
     <script type="module" src="/src/client/speaker.ts"></script>
   </body>

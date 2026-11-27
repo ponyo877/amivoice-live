@@ -4,19 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>登壇の振り返り | amivoice-live</title>
+    <script>
+      document.documentElement.dataset.theme =
+        localStorage.getItem("app-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/client/styles.css" />
   </head>
-  <body class="console report">
-    <header class="console-bar">
-      <a class="wordmark" href="/">amivoice-live</a>
-      <h1 class="console-title" id="title">読み込み中…</h1>
-      <span class="report-when" id="when"></span>
+  <body class="app report">
+    <header class="app-nav">
+      <a class="brand" href="/"><svg class="i logo" aria-hidden="true"><use href="/icons.svg#logo" /></svg><span>amivoice-live</span></a>
+      <span></span>
+      <div class="app-nav-end">
+        <button type="button" class="btn icon ghost" id="app-theme"><svg class="i" aria-hidden="true"><use href="/icons.svg#moon" /></svg></button>
+      </div>
     </header>
 
-    <main class="report-main">
+    <main class="app-main report-main">
+      <div class="report-title">
+        <div>
+          <a class="back-link" id="back" href="/speaker.html"><svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-left" /></svg>登壇者の画面</a>
+          <h1 id="title">読み込み中…</h1>
+        </div>
+        <span class="report-when" id="when"></span>
+      </div>
       <p class="report-progress" id="progress" role="status" hidden></p>
 
       <section class="figures" id="figures" aria-label="登壇のまとめ" hidden>
@@ -90,15 +104,16 @@
             </div>
           </div>
           <div class="audio-row">
-            <button type="button" class="button small" id="load-audio" hidden>録音を聞く</button>
+            <button type="button" class="btn sm" id="load-audio" hidden>録音を聞く</button>
             <audio id="audio" controls preload="none" hidden></audio>
           </div>
           <ol class="transcript" id="transcript"></ol>
           <p class="hint" id="transcript-empty" hidden></p>
-          <p class="hint">
-            書き出す:
-            <a id="dl-archive-vtt" target="_blank">アーカイブ（WebVTT）</a>・<a id="dl-archive-md" target="_blank">アーカイブ（Markdown）</a>・<a id="dl-live-md" target="_blank">ライブ（Markdown）</a>
-          </p>
+          <div class="link-row">
+            <a class="btn sm" id="dl-archive-vtt" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>アーカイブ（WebVTT）</a>
+            <a class="btn sm" id="dl-archive-md" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>アーカイブ（Markdown）</a>
+            <a class="btn sm" id="dl-live-md" target="_blank"><svg class="i" aria-hidden="true"><use href="/icons.svg#download" /></svg>ライブ（Markdown）</a>
+          </div>
         </section>
 
         <section class="panel suggest-panel" aria-labelledby="suggest-heading">
@@ -106,10 +121,10 @@
             <h2 id="suggest-heading">次の登壇に向けた辞書</h2>
             <p class="hint">認識エンジンが自信を持てなかった語と前後の文脈を Claude に渡し、辞書に足すべき語と読みを提案してもらいます。</p>
           </div>
-          <button type="button" class="button primary" id="suggest">辞書の候補を出す</button>
+          <button type="button" class="btn primary" id="suggest"><svg class="i" aria-hidden="true"><use href="/icons.svg#sparkles" /></svg>辞書の候補を出す</button>
           <p class="status" id="suggest-status" role="status"></p>
           <ul class="suggestions" id="suggestions"></ul>
-          <button type="button" class="button" id="add-suggestions" hidden>選んだ語を辞書に追加</button>
+          <button type="button" class="btn" id="add-suggestions" hidden>選んだ語を辞書に追加</button>
           <details class="unsure-list" id="unsure-details" hidden>
             <summary>自信のない語（<span id="unsure-count">0</span>）</summary>
             <ul id="unsure-list"></ul>
@@ -118,8 +133,8 @@
       </div>
 
       <section class="report-actions" aria-label="登壇の操作">
-        <button type="button" class="button" id="retry" hidden>アーカイブと振り返りを作り直す</button>
-        <button type="button" class="button" id="delete-recording" hidden>録音を削除する</button>
+        <button type="button" class="btn" id="retry" hidden>アーカイブと振り返りを作り直す</button>
+        <button type="button" class="btn" id="delete-recording" hidden>録音を削除する</button>
         <p class="status" id="action-status" role="status"></p>
       </section>
     </main>

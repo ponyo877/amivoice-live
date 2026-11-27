@@ -3,35 +3,61 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#1b2033" />
+    <meta name="theme-color" content="#141414" />
     <title>字幕 | amivoice-live</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/client/styles.css" />
   </head>
-  <body class="viewer">
+  <body class="viewer" data-caption-theme="dark">
     <header class="viewer-bar">
-      <span class="tally" id="tally" data-live="false">
-        <span class="tally-dot" aria-hidden="true"></span>
-        <span id="tally-text">待機中</span>
-      </span>
-      <span class="recording" id="recording" hidden title="アーカイブ字幕を作るため、この登壇の音声を録音しています">録音中</span>
-      <h1 class="viewer-title" id="title">字幕</h1>
+      <a class="brand" href="/"><svg class="i logo" aria-hidden="true"><use href="/icons.svg#logo" /></svg><span>amivoice-live</span></a>
       <div class="viewer-tools">
-        <button type="button" class="tool" id="smaller" aria-label="文字を小さくする">A<small>−</small></button>
-        <button type="button" class="tool" id="larger" aria-label="文字を大きくする">A<small>＋</small></button>
-        <button type="button" class="tool" id="theme" aria-label="明るい表示に切り替える">◐</button>
+        <button type="button" class="btn icon ghost" id="smaller" aria-label="文字を小さくする" title="文字を小さくする">A<small>−</small></button>
+        <button type="button" class="btn icon ghost" id="larger" aria-label="文字を大きくする" title="文字を大きくする">A<small>＋</small></button>
       </div>
     </header>
 
-    <main class="caption-stage" id="stage">
-      <p class="caption-empty" id="empty">登壇が始まると、ここに字幕が流れます。</p>
-    </main>
-    <button type="button" class="jump" id="jump" hidden>最新の字幕へ</button>
-    <p class="legend" id="legend" hidden></p>
+    <main class="viewer-main">
+      <div class="card room-card">
+        <span class="status-icon" id="net-state" data-state="connecting" role="img" aria-label="つないでいます" title="つないでいます">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#wifi" /></svg>
+        </span>
+        <div class="room-id">
+          <h1 id="title">字幕</h1>
+          <p>
+            <span class="tally" id="tally" data-live="false"><span class="tally-dot" aria-hidden="true"></span><span id="tally-text">待機中</span></span>
+            <span class="recording" id="recording" hidden title="アーカイブ字幕を作るため、この登壇の音声を録音しています">録音中</span>
+          </p>
+        </div>
+        <button type="button" class="btn icon ghost" id="fullscreen" aria-label="全画面にする" title="全画面にする">
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#maximize" /></svg>
+        </button>
+      </div>
 
-    <p class="connection" id="connection" hidden></p>
+      <section class="caption-card" aria-label="字幕">
+        <div class="caption-stage" id="stage">
+          <div class="caption-empty" id="empty">
+            <span class="empty-icon"><svg class="i" aria-hidden="true"><use href="/icons.svg#mic" /></svg></span>
+            <p id="empty-text">登壇者が配信を始めるのを待っています…</p>
+          </div>
+        </div>
+        <button type="button" class="jump" id="jump" hidden>
+          <svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-down" /></svg>最新の字幕へ
+        </button>
+        <p class="legend" id="legend" hidden></p>
+      </section>
+
+      <div class="viewer-actions">
+        <button type="button" class="btn" id="theme"><svg class="i" aria-hidden="true"><use href="/icons.svg#sun" /></svg><span>明るく</span></button>
+        <a class="btn danger" id="leave" href="/"><svg class="i" aria-hidden="true"><use href="/icons.svg#leave" /></svg>退出</a>
+        <button type="button" class="btn" id="share"><svg class="i" aria-hidden="true"><use href="/icons.svg#share" /></svg><span>共有</span></button>
+      </div>
+    </main>
+
+    <p class="connection" id="connection" role="status" hidden></p>
     <script type="module" src="/src/client/view.ts"></script>
   </body>
 </html>

@@ -5,65 +5,473 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>amivoice-live | 勉強会のためのリアルタイム字幕</title>
     <meta name="description" content="スライドから技術用語の辞書を作り、AmiVoice API で登壇をリアルタイムに字幕にします。参加者はスマホで QR コードを読むだけで見られます。" />
+    <script>
+      document.documentElement.dataset.theme =
+        localStorage.getItem("app-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    </script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/client/styles.css" />
   </head>
   <body class="home">
-    <header class="home-bar">
-      <span class="wordmark">amivoice-live</span>
-      <a href="https://github.com/ponyo877/amivoice-live">ソースコード</a>
+    <p class="announce">
+      <a href="https://github.com/ponyo877/amivoice-live" target="_blank" rel="noopener">ソースコードと評価の実験データを GitHub で公開しています<svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg></a>
+    </p>
+
+    <header class="site-nav">
+      <a class="brand" href="/"><svg class="i logo" aria-hidden="true"><use href="/icons.svg#logo" /></svg><span>amivoice-live</span></a>
+      <nav class="site-links" aria-label="ページ内の移動">
+        <a href="#compare">辞書の効き目</a>
+        <a href="#features">機能</a>
+        <a href="#how">使い方</a>
+        <a href="#faq">よくある質問</a>
+      </nav>
+      <div class="site-nav-end">
+        <button type="button" class="btn icon ghost" id="app-theme"><svg class="i" aria-hidden="true"><use href="/icons.svg#moon" /></svg></button>
+        <a class="btn ghost github-link" href="https://github.com/ponyo877/amivoice-live" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="/icons.svg#github" /></svg>GitHub</a>
+        <button type="button" class="btn ink" data-open-create>ルームを作る</button>
+      </div>
     </header>
 
-    <main class="home-main">
-      <section class="hero">
-        <h1>技術用語まで、聞き取れる字幕を。</h1>
-        <p class="lede">登壇スライドから誤認識されやすい語を辞書にして、AmiVoice API でリアルタイムに字幕を出します。参加者は QR コードを読むだけで、手元のスマホで字幕を追えます。</p>
+    <main>
+      <!-- ヒーロー -->
+      <section class="section hero">
+        <div class="hero-copy">
+          <div class="badges">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#broadcast" /></svg>AmiVoice API でリアルタイム認識</span>
+            <span class="badge plain">用語の再現率 27% → 97%</span>
+          </div>
+          <h1>技術用語まで、<br />聞き取れる字幕を。</h1>
+          <p class="lede">登壇スライドから誤認識されやすい語と読みを辞書にして、AmiVoice API に渡します。参加者は QR コードを読むだけで、手元のスマホで字幕を追えます。</p>
+          <div class="hero-actions">
+            <button type="button" class="btn primary lg" data-open-create>ルームを作る<svg class="i arrow" aria-hidden="true"><use href="/icons.svg#arrow-up-right" /></svg></button>
+            <a class="btn lg" href="#compare">辞書の効き目を見る</a>
+          </div>
+          <p class="hero-note">参加者は登録もアプリも要りません。ブラウザだけで字幕を見られます。</p>
+        </div>
 
-        <figure class="hero-demo" aria-label="辞書の有無による字幕の違いの例">
-          <div class="demo-row">
-            <span class="demo-tag">辞書なし</span>
+        <div class="hero-art" aria-hidden="true">
+          <div class="laptop">
+            <div class="laptop-screen">
+              <div class="laptop-display">
+                <div class="mock-slide">
+                  <strong>Durable Objects で作る<br />リアルタイム字幕</strong>
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="mock-overlay">
+                  <p>部屋ごとに<mark class="term">Durable Objects</mark>を一つ用意して、</p>
+                  <p><mark class="term">WebSocket</mark>をつないでいます。</p>
+                </div>
+              </div>
+            </div>
+            <div class="laptop-base"></div>
+          </div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-room">
+                <svg class="i" aria-hidden="true"><use href="/icons.svg#wifi" /></svg>
+                <span><b>Workers LT #12</b><small>● 配信中</small></span>
+              </div>
+              <div class="phone-captions">
+                <p>今日は<mark class="term">Durable Objects</mark>を使ってリアルタイム字幕を作った話をします。</p>
+                <p>部屋ごとに<mark class="term">Durable Objects</mark>を一つ用意して<mark class="term">WebSocket</mark>をつないでいます。</p>
+                <p class="is-partial">参加者の接続は<mark class="term">Hibernation</mark>で</p>
+              </div>
+              <div class="phone-bar"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- このブラウザで作ったルーム -->
+      <section class="section my-rooms" id="my-rooms" aria-labelledby="my-rooms-heading" hidden>
+        <div class="my-rooms-head">
+          <h2 id="my-rooms-heading">このブラウザで作ったルーム</h2>
+          <button type="button" class="btn sm" data-open-create><svg class="i" aria-hidden="true"><use href="/icons.svg#plus" /></svg>新しいルーム</button>
+        </div>
+        <ul class="room-list" id="room-list"></ul>
+      </section>
+
+      <!-- 辞書の有無の比較 -->
+      <section class="section compare" id="compare" aria-labelledby="compare-heading">
+        <div class="section-head">
+          <span class="badge">実際の字幕</span>
+          <h2 id="compare-heading">同じ音声でも、辞書があれば用語が字幕に出ます</h2>
+          <p class="lede">模擬 LT の同じ音声を、AmiVoice API の会話_汎用エンジンでライブ認識した字幕です。下線の語は、スライドから作った辞書で正しく出た語です。</p>
+        </div>
+        <figure class="compare-card" aria-label="辞書の有無による字幕の違いの例">
+          <div class="compare-row">
+            <span class="compare-tag">辞書なし</span>
             <p class="caption-line is-wrong">ブロック今かれん氏whileの中で、外部への設置を待つと、その間、他のリクエストが全部止まってしまいます。</p>
           </div>
-          <div class="demo-row">
-            <span class="demo-tag is-on">辞書あり</span>
+          <div class="compare-row">
+            <span class="compare-tag is-on"><svg class="i" aria-hidden="true"><use href="/icons.svg#book" /></svg>辞書あり</span>
             <p class="caption-line"><mark class="term">blockConcurrencyWhile</mark>の中で、外部への<mark class="term">fetch</mark>を待つと、その間、他のリクエストが全部止まってしまいます。</p>
           </div>
-          <figcaption>模擬 LT の同じ音声を AmiVoice API（会話_汎用）でライブ認識した、実際の字幕です。下線の語は、スライドから作った辞書で正しく出た語です。</figcaption>
+          <figcaption class="compare-foot">
+            <span class="compare-stat">用語の再現率<strong>26.7% → 97.3%</strong></span>
+            <span class="compare-stat">文字の誤り率（CER）<strong>14.1% → 3.1%</strong></span>
+            <span class="compare-stat">話し終わりから確定まで<strong>454 → 456 ms</strong></span>
+          </figcaption>
         </figure>
+        <p class="compare-note">合成音声で作った模擬 LT 3 本（用語 75 か所）の結果です。辞書を渡しても、字幕が確定するまでの時間はほとんど変わりません。</p>
       </section>
 
-      <section class="steps" aria-labelledby="steps-heading">
-        <h2 id="steps-heading">使い方</h2>
-        <ol>
-          <li><strong>ルームを作る。</strong>勉強会の名前を入れて作ると、登壇者の画面が開きます。</li>
-          <li><strong>スライドから辞書を作る。</strong>PDF を渡すと、製品名や略語とその読みを Claude が抜き出します。</li>
-          <li><strong>配信を始めて QR コードを見せる。</strong>参加者のスマホとプロジェクターに同じ字幕が流れます。</li>
-        </ol>
+      <!-- 機能 -->
+      <section class="section features" id="features" aria-label="機能">
+        <article class="feature">
+          <div class="feature-copy">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#sparkles" /></svg>スライドから辞書</span>
+            <h2>スライドを渡すと、用語と読みの辞書ができます</h2>
+            <p>PDF を渡すと、製品名や略語、英語の API 名を Claude が抜き出し、AmiVoice API が手がかりにするひらがなの読みを付けます。表で直して保存すれば、配信中でも数秒で新しい辞書に切り替わります。</p>
+            <ul class="feature-points">
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>読みが空の語や、かなに直せない読みは赤で知らせます</li>
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>同じ読みの語が 2 つあると字幕がどちらに転ぶか分からないので、組を示します</li>
+            </ul>
+          </div>
+          <div class="feature-art" aria-hidden="true">
+            <div class="mock tilt">
+              <div class="mock-title">辞書<small>23 語</small></div>
+              <div class="mock-table">
+                <div><span>表記</span><span>読み</span><span>出現箇所</span></div>
+                <div><b>Durable Objects</b><span>でゅらぶるおぶじぇくつ</span><i>p.3</i></div>
+                <div><b>Hibernation API</b><span>はいばねーしょん…</span><i>p.4</i></div>
+                <div><b>WebSocket</b><span>うぇぶそけっと</span><i>p.3</i></div>
+                <div><b>McpServer</b><span class="warn">えむしーぴーさーばー</span><i>p.6</i></div>
+                <div><b>MCP サーバー</b><span class="warn">えむしーぴーさーばー</span><i>p.2</i></div>
+              </div>
+              <div class="mock-chips"><span class="on">辞書を使う</span><span>会話_汎用（ハイブリッド）</span><span>話者の色分け</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="feature-copy">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#broadcast" /></svg>登壇者の画面</span>
+            <h2>話しながら、字幕と遅れを確かめられます</h2>
+            <p>参加者と同じ字幕を手元で見ながら話せます。話し終わりから字幕が確定するまでの時間と、今月の AmiVoice API の残り時間も画面に出ます。</p>
+            <ul class="feature-points">
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg><kbd>F</kbd> でプレゼン表示、<kbd>T</kbd> で書き起こし表示の全画面に切り替わります</li>
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>質疑応答では、話し手ごとに色の帯を付けて分けます</li>
+            </ul>
+          </div>
+          <div class="feature-art" aria-hidden="true">
+            <div class="mock tilt-r">
+              <div class="mock-row spread">
+                <div class="mock-row"><span class="mock-icon ok"><svg class="i"><use href="/icons.svg#wifi" /></svg></span><span class="mock-icon ok"><svg class="i"><use href="/icons.svg#mic" /></svg></span></div>
+                <b>Workers LT #12</b>
+                <span class="mock-icon"><svg class="i"><use href="/icons.svg#screen" /></svg></span>
+              </div>
+              <div class="mock-stage">
+                <p class="dim">部屋ごとに<mark class="term">Durable Objects</mark>を一つ用意しています。</p>
+                <p>参加者の接続は<mark class="term">Hibernation API</mark>で休ませます。</p>
+                <p class="is-partial">なのでコストがほとんど</p>
+              </div>
+              <div class="mock-row spread">
+                <span class="mock-button"><svg class="i"><use href="/icons.svg#clock" /></svg>4:12</span>
+                <span class="mock-button live"><svg class="i"><use href="/icons.svg#stop" /></svg>配信を終える</span>
+                <span class="mock-row"><span class="mock-icon"><svg class="i"><use href="/icons.svg#link" /></svg></span><span class="mock-icon"><svg class="i"><use href="/icons.svg#users" /></svg></span></span>
+              </div>
+              <div class="mock-stats">
+                <div>話し終わりから確定まで<b>456 ms</b></div>
+                <div>今月の残り<b>6 時間 12 分</b></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="feature-copy">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#qr" /></svg>参加者の画面</span>
+            <h2>QR コードを読めば、手元のスマホに字幕が流れます</h2>
+            <p>後ろの席でも、スライドの字が小さくても、手元で字幕を追えます。文字の大きさと明るさは参加者が自分で変えられます。</p>
+            <ul class="feature-points">
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>話している途中の文字は淡く出し、確定すると白に変わります</li>
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>認識エンジンが自信を持てなかった語には点線が付きます</li>
+            </ul>
+          </div>
+          <div class="feature-art" aria-hidden="true">
+            <div class="phone static">
+              <div class="phone-screen">
+                <div class="phone-room">
+                  <svg class="i" aria-hidden="true"><use href="/icons.svg#wifi" /></svg>
+                  <span><b>Workers LT #12</b><small>● 配信中</small></span>
+                </div>
+                <div class="phone-captions">
+                  <p>参加者の接続は<mark class="term">Hibernation API</mark>で休ませます。</p>
+                  <p>質問です。<span class="unsure">アミボイス</span>の料金はどれくらいかかりますか。</p>
+                  <p class="is-partial">話している区間だけが</p>
+                </div>
+                <div class="phone-bar"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+            <div class="mock-pop">
+              <b>参加者に共有</b>
+              <div class="mock-qr"><canvas class="demo-qr"></canvas></div>
+              <div class="mock-url">/view.html?room=xqyee7ijhk</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="feature-copy">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#screen" /></svg>投影と OBS</span>
+            <h2>スライドの上に、字幕を重ねて投影できます</h2>
+            <p>背景を透かした表示を OBS のブラウザソースに入れると、スライドの下に最新の 2 行だけが帯で出ます。配信や録画にも、そのまま字幕が残ります。</p>
+            <ul class="feature-points">
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>黒い帯と白い帯、暗い背景と明るい背景から選べます</li>
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>会場のプロジェクターには、字幕だけを全画面で出せます</li>
+            </ul>
+          </div>
+          <div class="feature-art" aria-hidden="true">
+            <div class="mock-slide-frame">
+              <div class="mock-slide">
+                <strong>プロファイル単語で<br />用語を登録する</strong>
+                <span></span><span></span><span></span>
+              </div>
+              <div class="mock-overlay">
+                <p>音声認識には<mark class="term">AmiVoice</mark>を使っていて、</p>
+                <p><mark class="term">profileWords</mark>で専門用語を登録しています。</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="feature-copy">
+            <span class="badge"><svg class="i" aria-hidden="true"><use href="/icons.svg#chart" /></svg>アーカイブと振り返り</span>
+            <h2>登壇のあとに、字幕を作り直して振り返りをまとめます</h2>
+            <p>録音した登壇は、終わったあとに AmiVoice API の非同期 API で認識し直してアーカイブ字幕にします。話す速さ、フィラー、声の調子から推定した感情の起伏を時間に沿って並べ、次の登壇に向けた辞書の候補も出します。</p>
+            <ul class="feature-points">
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>アーカイブ字幕は WebVTT と Markdown で書き出せます</li>
+              <li><svg class="i" aria-hidden="true"><use href="/icons.svg#check" /></svg>録音は振り返りの画面からいつでも削除できます</li>
+            </ul>
+          </div>
+          <div class="feature-art" aria-hidden="true">
+            <div class="mock tilt">
+              <div class="mock-title">登壇の振り返り<small>4 分 52 秒</small></div>
+              <div class="mock-stats">
+                <div>話す速さ<b>342 文字/分</b></div>
+                <div>フィラー<b>17 回</b></div>
+              </div>
+              <svg class="mock-chart" viewBox="0 0 300 120">
+                <rect class="spk0" x="0" y="0" width="190" height="8" rx="2" />
+                <rect class="spk1" x="194" y="0" width="40" height="8" rx="2" />
+                <rect class="spk0" x="238" y="0" width="62" height="8" rx="2" />
+                <line class="grid" x1="0" x2="300" y1="30" y2="30" />
+                <line class="grid" x1="0" x2="300" y1="60" y2="60" />
+                <line class="grid" x1="0" x2="300" y1="90" y2="90" />
+                <path class="line" d="M0 70 L30 58 L60 62 L90 44 L120 50 L150 38 L180 46 L210 74 L240 56 L270 48 L300 52" />
+                <line class="tick" x1="22" x2="22" y1="104" y2="116" />
+                <line class="tick" x1="71" x2="71" y1="104" y2="116" />
+                <line class="tick" x1="98" x2="98" y1="104" y2="116" />
+                <line class="tick" x1="160" x2="160" y1="104" y2="116" />
+                <line class="tick" x1="215" x2="215" y1="104" y2="116" />
+                <line class="tick" x1="268" x2="268" y1="104" y2="116" />
+              </svg>
+            </div>
+          </div>
+        </article>
       </section>
 
-      <section class="create" aria-labelledby="create-heading">
-        <h2 id="create-heading">ルームを作る</h2>
-        <form id="create-form" class="create-form">
-          <label class="field">
-            <span>勉強会の名前</span>
-            <input type="text" name="title" maxlength="100" required placeholder="例: Workers LT #12" />
-          </label>
-          <label class="field">
-            <span>合言葉<small>（公開環境で設定されている場合）</small></span>
-            <input type="password" name="passphrase" autocomplete="off" />
-          </label>
-          <button type="submit" class="button primary">ルームを作る</button>
-          <p class="status" id="create-status" role="status"></p>
-        </form>
-        <p class="hint" id="resume" hidden>前に使ったルームの<a id="resume-link" href="/speaker.html">登壇者の画面を開く</a></p>
+      <!-- 使い方 -->
+      <div class="band" id="how">
+        <section class="section how" aria-labelledby="how-heading">
+          <div class="section-head center">
+            <h2 id="how-heading">3 つの手順で始められます</h2>
+            <p class="lede">登壇者の準備は、ルームを作ってスライドを渡すところまでです。参加者は何も準備しなくて構いません。</p>
+          </div>
+          <ol class="steps">
+            <li class="step">
+              <div class="step-art" aria-hidden="true">
+                <div class="mini-form">
+                  <span>勉強会の名前</span>
+                  <div>Workers LT #12</div>
+                  <span class="mock-button primary">ルームを作る</span>
+                </div>
+              </div>
+              <div class="step-copy">
+                <h3>ルームを作る</h3>
+                <p>勉強会の名前を入れると、登壇者の画面が開きます。ルームはあとから何度でも使えます。</p>
+              </div>
+            </li>
+            <li class="step">
+              <div class="step-art" aria-hidden="true">
+                <div class="mini-form">
+                  <span>slides.pdf から 23 語</span>
+                  <div><b>Durable Objects</b>　でゅらぶる…</div>
+                  <div><b>Hibernation API</b>　はいばねー…</div>
+                </div>
+              </div>
+              <div class="step-copy">
+                <h3>スライドから辞書を作る</h3>
+                <p>PDF を渡すと、製品名や略語とその読みを Claude が抜き出します。表で直してから保存します。</p>
+              </div>
+            </li>
+            <li class="step">
+              <div class="step-art" aria-hidden="true">
+                <div class="mini-qr"><canvas class="demo-qr"></canvas></div>
+              </div>
+              <div class="step-copy">
+                <h3>配信を始めて QR コードを見せる</h3>
+                <p>参加者のスマホと、プロジェクターや OBS に同じ字幕が流れます。</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <!-- 使う場面 -->
+      <section class="section scenes" aria-labelledby="scenes-heading">
+        <div class="section-head">
+          <h2 id="scenes-heading">勉強会のいろいろな場面で</h2>
+        </div>
+        <div class="scene-grid">
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">次の LT は、</span><mark class="term">Hono</mark>の<mark class="term">RPC</mark>で型を共有する話です。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#broadcast" /></svg>LT 会</h3><p class="scene-note">5 分の発表でも、用語の多い発表ほど辞書が効きます。</p></div>
+          </article>
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">ビルドは</span><mark class="term">Bazel</mark>のリモートキャッシュに寄せています。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#users" /></svg>社内勉強会</h3><p class="scene-note">社内の基盤やサービスの名前も、辞書に入れれば字幕に出ます。</p></div>
+          </article>
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">話者2</span>質問です。料金はどれくらいかかりますか。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#help" /></svg>質疑応答</h3><p class="scene-note">話し手ごとに色の帯を付けて、質問と回答を分けます。</p></div>
+          </article>
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">聞き逃した一言も、</span>手元の字幕でさかのぼれます。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#info" /></svg>聞こえにくい人への情報保障</h3><p class="scene-note">音声だけに頼らず、文字でも登壇を追えるようにします。</p></div>
+          </article>
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">配信の画面にも、</span>スライドの下に字幕が出ます。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#screen" /></svg>オンライン配信</h3><p class="scene-note">OBS のブラウザソースに入れるだけで、録画にも字幕が残ります。</p></div>
+          </article>
+          <article class="scene">
+            <p class="scene-caption"><span class="dim">00:12:31</span>ここからが本題の<mark class="term">Durable Objects</mark>です。</p>
+            <div><h3><svg class="i" aria-hidden="true"><use href="/icons.svg#history" /></svg>あとから見返す</h3><p class="scene-note">アーカイブ字幕を WebVTT で書き出し、動画に付けられます。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- よくある質問 -->
+      <div class="band" id="faq">
+        <section class="section faq" aria-labelledby="faq-heading">
+          <div class="section-head">
+            <h2 id="faq-heading">よくある質問</h2>
+            <p class="lede">ほかに気になることは、GitHub の Issue で聞いてください。</p>
+          </div>
+          <div class="faq-list">
+            <details>
+              <summary>参加者には何が必要ですか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>ブラウザだけです。QR コードかリンクを開けば、アカウントもアプリもなしで字幕を見られます。</p>
+            </details>
+            <details>
+              <summary>どのくらい正確ですか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>合成音声で作った模擬 LT 3 本では、スライドから作った辞書で文字の誤り率が 14.1% から 3.1% に下がり、用語 75 か所のうち 73 か所が正しく出ました。実際の LT の録音でも、登壇者の記事から作った辞書で固有の製品名が正しく出るようになりました。一方で、同じ読みの語が辞書に 2 つあると、辞書なしでは正しかった語が別の表記に変わることもあります。</p>
+            </details>
+            <details>
+              <summary>辞書はどうやって作られますか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>スライドの PDF か資料のテキストを Claude に渡し、音声認識で崩れやすい語と、そのひらがなの読みを抜き出させます。AmiVoice API には「表記と読み」の組（profileWords）として渡し、ハイブリッドエンジンが読みを手がかりに表記を選びます。</p>
+            </details>
+            <details>
+              <summary>音声や字幕はどこに残りますか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>AmiVoice API には、AmiVoice 側にログを残さない設定で送っています。「録音してアーカイブを作る」をオンにした登壇だけ、音声を Cloudflare R2 に保存します。録音は振り返りの画面から削除できます。参加者の画面には「録音中」と出るので、勉強会の冒頭でも録音することを伝えてください。</p>
+            </details>
+            <details>
+              <summary>料金はかかりますか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>参加者は無料です。音声認識には AmiVoice API を使うので、自分で動かす場合は AmiVoice の利用料がかかります。月に使う時間の上限を決めておくと、上限に達したあとの配信は始められなくなります。</p>
+            </details>
+            <details>
+              <summary>自分の勉強会用に動かせますか？<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></summary>
+              <p>MIT ライセンスで公開しています。Cloudflare Workers と Durable Objects で動き、AmiVoice API と Anthropic API のキーがあればデプロイできます。手順は <a href="https://github.com/ponyo877/amivoice-live#readme" target="_blank" rel="noopener">README</a> にあります。</p>
+            </details>
+          </div>
+        </section>
+      </div>
+
+      <section class="section">
+        <div class="cta">
+          <h2>次の勉強会に、字幕を。</h2>
+          <p>ルームを作って、スライドの PDF を渡すだけで始められます。</p>
+          <div class="hero-actions">
+            <button type="button" class="btn ink lg" data-open-create>ルームを作る</button>
+            <a class="btn outline lg" href="https://github.com/ponyo877/amivoice-live" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="/icons.svg#github" /></svg>GitHub で見る</a>
+          </div>
+        </div>
       </section>
     </main>
 
-    <footer class="home-foot">
-      <p>音声認識に <a href="https://acp.amivoice.com/amivoice_api/">AmiVoice API</a>、辞書づくりに Claude を使っています。音声は字幕にするためだけに送り、AmiVoice 側にはログを残さない接続先を使います。</p>
+    <footer class="site-foot">
+      <div class="section foot-grid">
+        <div class="foot-brand">
+          <a class="brand" href="/"><svg class="i logo" aria-hidden="true"><use href="/icons.svg#logo" /></svg><span>amivoice-live</span></a>
+          <p>勉強会と LT 会のためのリアルタイム字幕です。音声認識に AmiVoice API、辞書づくりに Claude を使っています。</p>
+        </div>
+        <div class="foot-col">
+          <h2>このページ</h2>
+          <ul>
+            <li><a href="#compare">辞書の効き目</a></li>
+            <li><a href="#features">機能</a></li>
+            <li><a href="#how">使い方</a></li>
+            <li><a href="#faq">よくある質問</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h2>資料</h2>
+          <ul>
+            <li><a href="https://github.com/ponyo877/amivoice-live" target="_blank" rel="noopener">ソースコード</a></li>
+            <li><a href="https://github.com/ponyo877/amivoice-live/tree/main/eval" target="_blank" rel="noopener">評価の実験</a></li>
+            <li><a href="https://github.com/ponyo877/amivoice-live/blob/main/LICENSE" target="_blank" rel="noopener">ライセンス（MIT）</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h2>使っている技術</h2>
+          <ul>
+            <li><a href="https://acp.amivoice.com/amivoice_api/" target="_blank" rel="noopener">AmiVoice API</a></li>
+            <li><a href="https://www.anthropic.com/claude" target="_blank" rel="noopener">Claude</a></li>
+            <li><a href="https://developers.cloudflare.com/durable-objects/" target="_blank" rel="noopener">Cloudflare Durable Objects</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="section foot-bottom">
+        <span>© 2026 ponyo877</span>
+        <span>MIT License</span>
+      </div>
     </footer>
+
+    <!-- ルームを作る -->
+    <dialog class="dialog" id="create-dialog" aria-labelledby="create-heading">
+      <form id="create-form">
+        <div class="dialog-head">
+          <div>
+            <h2 id="create-heading">ルームを作る</h2>
+            <p>勉強会の名前を入れると、登壇者の画面が開きます。</p>
+          </div>
+          <button type="button" class="btn icon sm ghost" id="create-close" aria-label="閉じる"><svg class="i" aria-hidden="true"><use href="/icons.svg#x" /></svg></button>
+        </div>
+        <label class="field">
+          <span>勉強会の名前</span>
+          <input type="text" name="title" maxlength="100" required placeholder="例: Workers LT #12" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>合言葉<small>（公開環境で設定されている場合）</small></span>
+          <input type="password" name="passphrase" autocomplete="off" />
+        </label>
+        <fieldset class="presets">
+          <legend>参加者の画面の配色<small class="hint">（共有するときに変えられます）</small></legend>
+          <label class="preset" data-theme="dark"><input type="radio" name="theme" value="dark" checked /><span class="preset-swatch"><span>字幕</span></span>暗い</label>
+          <label class="preset" data-theme="light"><input type="radio" name="theme" value="light" /><span class="preset-swatch"><span>字幕</span></span>明るい</label>
+          <label class="preset" data-theme="transparent-dark"><input type="radio" name="theme" value="transparent-dark" /><span class="preset-swatch"><span>字幕</span></span>透過・黒帯</label>
+          <label class="preset" data-theme="transparent-light"><input type="radio" name="theme" value="transparent-light" /><span class="preset-swatch"><span>字幕</span></span>透過・白帯</label>
+        </fieldset>
+        <button type="submit" class="btn primary lg">ルームを作る</button>
+        <p class="status" id="create-status" role="status"></p>
+      </form>
+    </dialog>
+
     <script type="module" src="/src/client/home.ts"></script>
   </body>
 </html>
