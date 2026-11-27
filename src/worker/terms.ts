@@ -140,7 +140,26 @@ export async function suggestTerms(apiKey: string, transcript: string, dictionar
     const [term] = normalizeTerms([{ written: s.written, readings: s.readings, source: "登壇の書き起こし" }]);
     if (term) out.push({ ...term, heard: s.heard, reason: s.reason });
   }
-  return out;
+  return mergeSuggestions(out);
+}
+
+/**
+ * 同じ表記の提案を 1 つにまとめる。同じ語が別々の箇所で誤認識されていると、Claude はその箇所ごとに提案を返すことがある。
+ * 読みは和集合、誤認識は「」でつないで並べ、理由は続けて書く。
+ */
+export function mergeSuggestions(suggestions: TermSuggestion[]): TermSuggestion[] {
+  const byWritten = new Map<string, TermSuggestion>();
+  for (const s of suggestions) {
+    const prev = byWritten.get(s.written);
+    if (!prev) {
+      byWritten.set(s.written, { ...s, readings: [...s.readings] });
+      continue;
+    }
+    prev.readings = [...new Set([...prev.readings, ...s.readings])];
+    if (s.heard && !prev.heard.split("」「").includes(s.heard)) prev.heard = prev.heard ? `${prev.heard}」「${s.heard}` : s.heard;
+    if (s.reason) prev.reason = prev.reason ? `${prev.reason} ${s.reason}` : s.reason;
+  }
+  return [...byWritten.values()];
 }
 
 /** 読みの検証・重複の除去・上限の適用。 */
