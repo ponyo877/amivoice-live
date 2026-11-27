@@ -2315,8 +2315,17 @@ body.app {
 
 /* 登壇者: 辞書と記録 */
 .view {
-  display: grid;
-  gap: 1.25rem;
+  display: flow-root;
+}
+/* 要素どうしの間だけを空ける。空の状況表示は高さも余白も持たないので、前後の隙間が重ならない */
+.view > * + * {
+  margin-top: 1.25rem;
+}
+.view > .status {
+  margin-top: 0.75rem;
+}
+.view > .status:empty {
+  margin-top: 0;
 }
 .view-head {
   display: flex;
@@ -2625,8 +2634,12 @@ body.viewer[data-caption-theme="light"] .empty-icon {
   display: flex;
   gap: 0.25rem;
 }
+.viewer-tools .btn {
+  gap: 0;
+}
 .viewer-tools .btn small {
   font-size: 0.7em;
+  margin-top: -0.4em;
 }
 
 .viewer-main {
@@ -3378,10 +3391,6 @@ body.report .unsure {
 .preview-card:fullscreen .meter,
 .preview-card.is-fullpage .meter {
   display: none;
-}
-/* 空の状況表示ぶんの隙間を詰める（要素は残して、読み上げの対象から外さない） */
-.view > .status:empty {
-  margin-top: -1.25rem;
 }
 .phone.static {
   position: relative;
