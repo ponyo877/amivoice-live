@@ -148,3 +148,6 @@
 {"at":"2026-11-26T06:50:46.997Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":282.2,"label":"stream m1Y1QhJUN2k -a-general 辞書=zenn"}
 {"at":"2026-11-26T06:56:00.104Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":254.8,"label":"stream 0KOvMZw79-E -a-general 辞書なし"}
 {"at":"2026-11-26T06:56:00.107Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":254.8,"label":"stream 0KOvMZw79-E -a-general 辞書=abstract"}
+{"at":"2026-11-27T12:40:34.631Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":30,"label":"smoke probe.wav"}
+{"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"label":"smoke probe.wav アーカイブ"}
+{"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"sentiment":true,"label":"smoke probe.wav 振り返り"}
