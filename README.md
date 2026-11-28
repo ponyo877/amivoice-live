@@ -6,7 +6,10 @@
 
 ![登壇者の画面で字幕が流れる様子（模擬 LT の音声ファイルを流したところ）](docs/zenn/images/live.gif)
 
+操作の流れの動画（3 分半、YouTube の限定公開）: https://youtu.be/2QE6SkAue8Q
+
 - 登壇スライドの PDF から、誤認識されやすい技術用語とその読みを Claude が抜き出し、AmiVoice API のユーザー辞書（`profileWords`）に登録します。
+- Zenn の技術記事 1,641 本によく出る技術用語 1,830 語の辞書を前もって用意し、スライドの辞書に重ねて渡します（ハイブリッドエンジンだけ。登壇者の画面の設定で外せます）。
 - 参加者は QR コードを読むだけで、手元のスマホで字幕を追えます。プロジェクターや OBS に重ねる透過表示もあります。
 - 質疑応答で話者が替わると、AmiVoice の話者ダイアライゼーションで話者ごとに色を分けます。
 - 認識エンジンが自信を持てなかった語（信頼度の低い語）を点線で示します。読み手は「ここは誤認識かもしれない」と分かります。
@@ -174,6 +177,17 @@ AMIVOICE_API_KEY=... node eval/stream.ts --audio eval/data/talk.wav --engine=-a-
 node eval/compare.ts eval/data/talk.zenn.dict.json eval/out/talk.a-general.nodict.jsonl eval/out/talk.a-general.zenn.jsonl
 ```
 
+### 技術用語の辞書を作り直す
+
+アプリに組み込んでいる技術用語の辞書（`src/shared/tech-dictionary.json`）は、Zenn の記事から次の手順で作ります。集めた記事の本文は `.cache/zenn/` に置き、リポジトリには含めません。
+
+```sh
+node scripts/tech-dictionary/collect.ts 400                         # 記事数の多いトピック上位 400 個の人気記事を集める（0.5 秒おき）
+node scripts/tech-dictionary/candidates.ts                          # 英字を含む語と句を数え、4 本以上の記事に出た語を候補にする
+ANTHROPIC_API_KEY=... node scripts/tech-dictionary/curate.ts 6000   # 候補を 100 個ずつ Claude に渡し、技術用語を選んで読みを付けさせる
+node scripts/tech-dictionary/build.ts                               # 別の語と同じ読みや、辞書の中で重なる読みを除いて JSON にする
+```
+
 ## 開発
 
 ```sh
@@ -192,6 +206,8 @@ npm run build
 | `src/worker/async-api.ts` | 非同期 HTTP API のクライアント（録音をストリームのまま送る） |
 | `src/worker/usage.ts` | 月ごとの使用量を数え、上限を超える配信やジョブを止める Durable Object |
 | `src/worker/terms.ts` | スライドからの用語抽出と、書き起こしからの辞書の提案（Claude の構造化出力） |
+| `src/shared/tech-dictionary.ts` | Zenn の記事から作った技術用語の辞書を、ルームの辞書に重ねる（表記や読みが重なる語はルームの辞書を優先） |
+| `scripts/tech-dictionary/` | 技術用語の辞書を作るスクリプト（記事の収集、候補の数え上げ、Claude による選別、組み立て） |
 | `src/client/` | 登壇者・参加者・振り返り・トップの各画面 |
 | `public/pcm-worklet.js` | 音声を 16kHz PCM にする AudioWorklet |
 | `scripts/mock-amivoice.ts` | AmiVoice のモックサーバ |

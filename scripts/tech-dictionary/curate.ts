@@ -1,6 +1,6 @@
 // candidates.ts の候補を Claude に渡し、字幕に英字で出したい語を選んで読みを付けてもらう。
 //
-//   ANTHROPIC_API_KEY=... node scripts/tech-dictionary/curate.ts [候補の上限=4500]
+//   ANTHROPIC_API_KEY=... node scripts/tech-dictionary/curate.ts [候補の上限=6000]
 //
 // 100 語ずつ渡し、結果は .cache/zenn/curated/ に残す（途中で止まっても、残りから続けられる）。
 // 最後に build.ts で、読みのぶつかりを除いてアプリの辞書（src/shared/tech-dictionary.json）にする。
@@ -95,7 +95,7 @@ async function curateBatch(client: Anthropic, batch: Candidate[]): Promise<Curat
 async function main(): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("環境変数 ANTHROPIC_API_KEY を設定してください");
-  const limit = Number(process.argv[2] ?? 4500);
+  const limit = Number(process.argv[2] ?? 6000);
   const candidates = (JSON.parse(readFileSync(join(CACHE, "candidates.json"), "utf8")) as Candidate[]).slice(0, limit);
   mkdirSync(OUT, { recursive: true });
   const client = new Anthropic({ apiKey });
