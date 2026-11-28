@@ -6,6 +6,7 @@ import type { LiveStats, ServerMessage, TalkSummary, UsageStatus } from "../shar
 import { listMicrophones, startCapture, type AudioSourceKind, type Capture } from "./audio.ts";
 import { CaptionView } from "./captions.ts";
 import { LiveSocket, wsUrl } from "./socket.ts";
+import { SummaryView } from "./summary.ts";
 import { anchorPopovers, clock, flashLabel, icon, setIcon, setupTabs, setupThemeToggle } from "./ui.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -40,6 +41,7 @@ const useDict = $<HTMLInputElement>("use-dictionary");
 const useTech = $<HTMLInputElement>("use-tech");
 const diarization = $<HTMLInputElement>("diarization");
 const archive = $<HTMLInputElement>("archive");
+const useSummary = $<HTMLInputElement>("use-summary");
 const toggle = $<HTMLButtonElement>("toggle");
 const statusEl = $("status");
 const meter = $("meter");
@@ -72,6 +74,11 @@ diarization.addEventListener("change", () => {
 });
 archive.addEventListener("change", () => {
   localStorage.setItem("speaker-archive", archive.checked ? "1" : "0");
+});
+useSummary.checked = localStorage.getItem("speaker-summary") !== "0";
+useSummary.addEventListener("change", () => {
+  localStorage.setItem("speaker-summary", useSummary.checked ? "1" : "0");
+  if (capture) sendStart();
 });
 
 /** 操作の行の「入力」ボタンに、いま選んでいる入力を出す。 */
@@ -164,6 +171,8 @@ $("download-qr").addEventListener("click", () => {
 // ---- 配信 ----
 const preview = $("preview");
 const captions = new CaptionView($("stage"), { jumpButton: $<HTMLButtonElement>("jump") });
+// 参加者の画面と同じ「ここまでのまとめ」。広い画面では字幕のプレビューの横に出す
+const summaryView = new SummaryView($("summary"));
 let capture: Capture | null = null;
 
 const socket = new LiveSocket({
@@ -203,6 +212,7 @@ function setMicState(state: "off" | "starting" | "on" | "error", label: string):
 
 function handleMessage(msg: ServerMessage): void {
   captions.handle(msg);
+  summaryView.handle(msg);
   empty.hidden = !captions.isEmpty;
   switch (msg.type) {
     case "snapshot":
@@ -252,6 +262,7 @@ function sendStart(): void {
       useTech: useTech.checked,
       diarization: diarization.checked,
       archive: archive.checked,
+      summary: useSummary.checked,
     }),
   );
 }

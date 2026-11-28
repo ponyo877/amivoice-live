@@ -2,9 +2,11 @@
 // ?theme=dark|light で配色を、?focus=1 で字幕だけの表示を指定できる。
 // ?theme=transparent-dark|transparent-light は OBS・プロジェクター向けの透過表示（最新の 2 行だけを帯に乗せる）。
 // 以前の ?mode=overlay は ?theme=transparent-dark と同じに扱う。
+// 幅の広い画面では字幕の横に「ここまでのまとめ」を並べ、狭い画面ではタブで切り替える（?pane=summary でまとめから開く）。
 
 import { CaptionView, speakerName } from "./captions.ts";
 import { LiveSocket, wsUrl } from "./socket.ts";
+import { SummaryView } from "./summary.ts";
 import { flashLabel, setIcon } from "./ui.ts";
 
 const params = new URLSearchParams(location.search);
@@ -84,6 +86,50 @@ $("share").addEventListener("click", async () => {
   flashLabel($("share"), "コピーしました");
 });
 
+// ---- 字幕とまとめの切り替え（狭い画面だけ。広い画面では並べて出す） ----
+const panes = $("panes");
+const paneTabs = { captions: $("pane-captions"), summary: $("pane-summary") };
+const summaryDot = $("summary-dot");
+const nowBar = $("now-bar");
+const wide = matchMedia("(min-width: 900px)");
+
+function showPane(pane: "captions" | "summary", focusTab = false): void {
+  panes.dataset.pane = pane;
+  for (const [name, tab] of Object.entries(paneTabs)) {
+    const selected = name === pane;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    if (selected && focusTab) tab.focus();
+  }
+  if (pane === "summary") summaryDot.hidden = true;
+}
+paneTabs.captions.addEventListener("click", () => showPane("captions"));
+paneTabs.summary.addEventListener("click", () => showPane("summary"));
+for (const tab of Object.values(paneTabs)) {
+  tab.addEventListener("keydown", (ev) => {
+    if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+    ev.preventDefault();
+    showPane(panes.dataset.pane === "captions" ? "summary" : "captions", true);
+  });
+}
+nowBar.addEventListener("click", () => showPane("summary"));
+if (params.get("pane") === "summary") showPane("summary");
+
+let live = false;
+function renderNowBar(): void {
+  const summary = summaryView.current;
+  $("now-text").textContent = summary?.now ?? "";
+  nowBar.hidden = !summary || !live;
+}
+const summaryView = new SummaryView($("summary"), {
+  onUpdate: (summary) => {
+    renderNowBar();
+    // 字幕を見ている人には、まとめが新しくなったことをタブの点で知らせる
+    if (summary && !wide.matches && panes.dataset.pane !== "summary") summaryDot.hidden = false;
+    if (!summary) summaryDot.hidden = true;
+  },
+});
+
 // ---- 字幕 ----
 const captions = new CaptionView(stage, {
   jumpButton: $("jump") as HTMLButtonElement,
@@ -157,8 +203,13 @@ if (!roomId) {
     },
     onMessage: (msg) => {
       captions.handle(msg);
+      summaryView.handle(msg);
       if (msg.type === "snapshot" || msg.type === "room") {
         const room = msg.room;
+        // まとめを作らないルームでは、まとめの欄とタブを出さない（作ったまとめが残っていれば出す）
+        document.body.classList.toggle("no-summary", !room.summary && !summaryView.current);
+        live = room.live;
+        renderNowBar();
         titleEl.textContent = room.title;
         document.title = `${room.title} の字幕 | amivoice-live`;
         tally.dataset.live = String(room.live);

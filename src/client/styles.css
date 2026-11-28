@@ -2888,6 +2888,702 @@ body.is-overlay.is-overlay-light .caption-line.is-partial {
 }
 
 /* ===================================================================
+   ここまでのまとめ（配信中に Claude が作り直す図解）
+   - 節の種類ごとの色は字幕の話者の色と同じ並びから取り、文字は本文の色のまま（色は種類の目印だけ）
+   - 「いま」と結論は字幕イエロー。辞書の下線と同じ色で、製品の差し色を 1 色に保つ
+   =================================================================== */
+
+.summary {
+  --k-tool: #338ced;
+  --k-concept: #8d8d88;
+  --k-problem: #e24d8b;
+  --k-cause: #e76624;
+  --k-solution: #00a888;
+  --k-point: #ffd23f;
+  --edge: rgb(255 255 255 / 0.32);
+  --summary-bg: var(--card);
+}
+/* 参加者の画面は暗い配色が既定（ページ全体のテーマとは別に切り替える） */
+body.viewer .summary {
+  --accent-soft: rgb(255 210 63 / 0.14);
+  --accent-line: #ffd23f;
+}
+body.viewer[data-caption-theme="light"] .summary {
+  --accent-soft: #fff4cc;
+  --accent-line: #c99a00;
+}
+body.viewer[data-caption-theme="light"] .summary,
+:root[data-theme="light"] .summary,
+.report .summary {
+  --k-tool: #257de0;
+  --k-concept: #8a8a8a;
+  --k-problem: #d63a7c;
+  --k-cause: #e0601c;
+  --k-solution: #00a383;
+  --k-point: #e3b100;
+  --edge: rgb(0 0 0 / 0.3);
+}
+:root[data-theme="dark"] .summary {
+  --k-tool: #338ced;
+  --k-concept: #8d8d88;
+  --k-problem: #e24d8b;
+  --k-cause: #e76624;
+  --k-solution: #00a888;
+  --k-point: #ffd23f;
+  --edge: rgb(255 255 255 / 0.32);
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--summary-bg, var(--card));
+}
+.summary-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0.55rem;
+  border-bottom: 1px solid var(--border);
+}
+.summary-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.summary-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.summary-error {
+  color: var(--error);
+}
+.summary-spinner {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: summary-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes summary-pulse {
+  from {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+.summary-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.9rem 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.summary-body:empty {
+  display: none;
+}
+.summary-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.summary-empty p {
+  max-width: 22em;
+  margin: 0;
+}
+
+.summary-topic {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+.summary-now {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  background: var(--accent-soft);
+}
+.summary-now p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.summary-now-label,
+.now-bar-label,
+.dnode-now {
+  flex: none;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--accent-fg);
+  background: var(--accent);
+}
+.summary-now-label {
+  margin-top: 0.15rem;
+}
+
+.summary-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* 図 */
+.diagram {
+  margin: 0;
+  padding: 0.75rem 0.75rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.diagram-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.diagram-canvas {
+  position: relative;
+  /* 節の幅を図の幅に合わせる（狭い画面でも 1 行に 2 つは並べ、段の折り返しを減らす） */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 3.4rem;
+  padding: 0.25rem 0 0.5rem;
+}
+.diagram-edges {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.diagram-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.diagram-canvas.is-moving .diagram-edges,
+.diagram-canvas.is-moving .diagram-labels {
+  opacity: 0;
+}
+.diagram-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.6rem 0.9rem;
+}
+.dnode {
+  --k: var(--k-concept);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  max-width: min(11.5em, calc((100cqw - 0.9rem) / 2));
+  min-width: 5.5em;
+  padding: 0.4rem 0.6rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--k) 60%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--k) 16%, var(--summary-bg, var(--card)));
+  font-size: 0.84rem;
+  line-height: 1.4;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.dnode[data-kind="tool"] {
+  --k: var(--k-tool);
+}
+.dnode[data-kind="problem"] {
+  --k: var(--k-problem);
+}
+.dnode[data-kind="cause"] {
+  --k: var(--k-cause);
+}
+.dnode[data-kind="solution"] {
+  --k: var(--k-solution);
+}
+.dnode[data-kind="point"] {
+  --k: var(--k-point);
+}
+.dnode-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.dnode-kind::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: var(--k);
+}
+.dnode-label {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.dnode.is-focus {
+  box-shadow:
+    0 0 0 2px var(--summary-bg, var(--card)),
+    0 0 0 4px var(--accent);
+}
+.dnode-now {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.5rem;
+  font-size: 0.64rem;
+}
+.dnode.is-new {
+  animation: dnode-in 1.8s ease-out;
+}
+@keyframes dnode-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  35% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.dedge {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 1.5;
+}
+.dedge.is-focus {
+  stroke: var(--accent-line, var(--accent));
+  stroke-width: 2;
+}
+.dedge-head {
+  fill: var(--edge);
+}
+.dedge-head.is-focus {
+  fill: var(--accent-line, var(--accent));
+}
+.dedge-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 8em;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  background: var(--summary-bg, var(--card));
+}
+.dedge-label.is-focus {
+  color: var(--fg);
+}
+.diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.8rem;
+  margin: 0.4rem 0 0;
+  padding: 0.5rem 0 0;
+  border-top: 1px dashed var(--border);
+  list-style: none;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.diagram-legend li {
+  --k: var(--k-concept);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.diagram-legend li[data-kind="tool"] {
+  --k: var(--k-tool);
+}
+.diagram-legend li[data-kind="problem"] {
+  --k: var(--k-problem);
+}
+.diagram-legend li[data-kind="cause"] {
+  --k: var(--k-cause);
+}
+.diagram-legend li[data-kind="solution"] {
+  --k: var(--k-solution);
+}
+.diagram-legend li[data-kind="point"] {
+  --k: var(--k-point);
+}
+.legend-swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  background: var(--k);
+}
+
+/* 流れ */
+.flow {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.flow-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.6rem;
+  padding: 0.35rem 0.4rem 0.6rem 0;
+  border-radius: 8px;
+}
+.flow-item::before {
+  content: "";
+  position: absolute;
+  left: 3.3rem;
+  top: 0.95rem;
+  bottom: -0.35rem;
+  width: 1px;
+  background: var(--border-strong);
+}
+.flow-item:last-child::before {
+  display: none;
+}
+.flow-time {
+  padding-top: 0.12rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.flow-box {
+  position: relative;
+  padding-left: 0.95rem;
+}
+.flow-box::before {
+  content: "";
+  position: absolute;
+  left: -0.27rem;
+  top: 0.42rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--summary-bg, var(--card));
+  border: 2px solid var(--border-strong);
+}
+.flow-item.is-current .flow-box::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.flow-title {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.flow-points {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1em;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.flow-points li::marker {
+  color: var(--border-strong);
+}
+
+/* 用語 */
+.terms {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+.term-item {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.term-item dt {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.term-item dt.is-dict {
+  text-decoration: underline;
+  text-decoration-color: var(--stage-term, var(--accent));
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.25em;
+}
+.term-item dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* 質疑応答 */
+.qa-item {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.qa-item + .qa-item {
+  margin-top: 0.5rem;
+}
+.qa-q,
+.qa-a {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.qa-a {
+  margin-top: 0.3rem;
+  color: var(--muted);
+}
+.qa-a.is-pending {
+  font-style: italic;
+}
+.qa-q b,
+.qa-a b {
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: var(--fg);
+  background: var(--secondary);
+}
+.qa-q b {
+  color: #fff;
+  background: var(--spk-1);
+}
+
+.is-updated {
+  animation: summary-updated 2.4s ease-out;
+}
+@keyframes summary-updated {
+  0%,
+  30% {
+    background-color: var(--accent-soft);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* 参加者の画面: 広い画面では字幕とまとめを並べ、狭い画面ではタブで切り替える */
+.viewer-switch.tabs {
+  display: none;
+}
+.switch-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.viewer-panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+.viewer-panes > .caption-card {
+  flex: none;
+  height: 100%;
+}
+.now-bar {
+  display: none;
+}
+@media (min-width: 900px) {
+  body.viewer:not(.is-focus):not(.no-summary) .viewer-main {
+    width: min(88rem, 100%);
+  }
+}
+@media (max-width: 899.98px) {
+  .viewer-switch.tabs {
+    display: flex;
+  }
+  .viewer-panes {
+    display: flex;
+    flex-direction: column;
+  }
+  .viewer-panes > section {
+    flex: 1;
+    min-height: 0;
+  }
+  .viewer-panes[data-pane="captions"] > .summary-card,
+  .viewer-panes[data-pane="summary"] > .caption-card {
+    display: none;
+  }
+  .now-bar:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border: 0;
+    border-bottom: 1px solid var(--stage-border);
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--stage-fg);
+    background: color-mix(in srgb, var(--accent) 10%, var(--stage-bg));
+    text-align: left;
+    cursor: pointer;
+  }
+  .now-bar-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .summary-topic {
+    font-size: 1.05rem;
+  }
+}
+body.viewer.is-focus .viewer-switch,
+body.viewer.is-focus .summary-card,
+body.viewer.is-focus .now-bar,
+body.viewer.no-summary .viewer-switch,
+body.viewer.no-summary .summary-card,
+body.viewer.no-summary .now-bar {
+  display: none !important;
+}
+body.viewer.is-focus .viewer-panes,
+body.viewer.no-summary .viewer-panes {
+  display: flex;
+  flex-direction: column;
+}
+body.viewer.is-focus .viewer-panes > .caption-card,
+body.viewer.no-summary .viewer-panes > .caption-card {
+  display: flex !important;
+  flex: 1;
+  height: auto;
+}
+
+/* 振り返りの画面: 配信中に作った最後のまとめを、高さを決めずに全部見せる */
+.report-summary .summary-body {
+  overflow: visible;
+}
+@media (min-width: 900px) {
+  /* 図は全幅にして段の折り返しを減らし、流れと用語・質疑応答をその下に 2 列で並べる */
+  .report-summary .summary-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* 主題・図・用語・質疑応答の順の行。流れの高さの余りは最後の行で受け、用語と質疑応答のあいだを空けない */
+    grid-template-rows: auto auto auto 1fr;
+    align-items: start;
+    column-gap: 2rem;
+  }
+  .report-summary .summary-topic,
+  .report-summary .summary-now,
+  .report-summary .diagram {
+    grid-column: 1 / -1;
+  }
+  .report-summary .is-flow {
+    grid-column: 1;
+    grid-row: span 2;
+  }
+  .report-summary .is-terms,
+  .report-summary .is-qa {
+    grid-column: 2;
+  }
+}
+
+/* 登壇者の画面: 広い画面では、字幕のプレビューの横にまとめを並べる */
+.speaker-summary {
+  height: 36rem;
+  box-shadow: var(--shadow);
+}
+@media (min-width: 1240px) {
+  body.speaker .app-main:has(#view-live:not([hidden])) {
+    width: min(90rem, calc(100% - 2rem));
+  }
+  .live-view {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    grid-template-areas:
+      "room summary"
+      "preview summary"
+      "control summary"
+      "status summary"
+      "help summary";
+    align-items: start;
+  }
+  .live-view > .room-card {
+    grid-area: room;
+  }
+  .live-view > .preview-card {
+    grid-area: preview;
+  }
+  .live-view > .control-row {
+    grid-area: control;
+  }
+  .live-view > .live-status {
+    grid-area: status;
+  }
+  .live-view > .live-help {
+    grid-area: help;
+  }
+  .live-view > .speaker-summary {
+    grid-area: summary;
+    align-self: stretch;
+    height: auto;
+    max-height: calc(100dvh - 7rem);
+    position: sticky;
+    top: 5.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dnode,
+  .dnode.is-new,
+  .is-updated,
+  .summary-spinner {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ===================================================================
    振り返り
    =================================================================== */
 

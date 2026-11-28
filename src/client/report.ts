@@ -5,6 +5,7 @@
 import type { DictionaryTerm } from "../shared/amivoice.ts";
 import type { TalkReport } from "../shared/async-result.ts";
 import type { CaptionLine, TalkDetail } from "../shared/protocol.ts";
+import { SummaryView } from "./summary.ts";
 import { speakerName } from "./captions.ts";
 import { setupThemeToggle } from "./ui.ts";
 
@@ -27,6 +28,8 @@ const api = (path: string) => `/api/rooms/${encodeURIComponent(roomId)}${path}`;
 const authHeaders = { authorization: `Bearer ${token}` };
 
 let detail: TalkDetail | null = null;
+// 配信中に Claude が作った「ここまでのまとめ」の最後の版
+const summaryView = new SummaryView($("summary"), { title: "話の内容のまとめ" });
 let source: "archive" | "live" = "archive";
 let pollTimer: number | undefined;
 
@@ -77,6 +80,8 @@ function render(d: TalkDetail): void {
   else $("progress").hidden = true;
 
   if (d.report) renderReport(d.report, d);
+  $("summary").hidden = !d.summary;
+  if (d.summary) summaryView.show(d.summary);
   if (!d.archive.length) source = "live";
   (document.querySelector(`input[name="source"][value="${source}"]`) as HTMLInputElement).checked = true;
   (document.querySelector('input[name="source"][value="archive"]') as HTMLInputElement).disabled = d.archive.length === 0;

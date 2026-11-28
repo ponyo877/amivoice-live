@@ -28,9 +28,11 @@ import { asyncUtterances, buildReport, speakerIndexes, type AsyncJobResult, type
 import type {
   CaptionLine,
   LiveStats,
+  LiveSummary,
   RoomInfo,
   ServerMessage,
   SpeakerMessage,
+  SummaryState,
   TalkDetail,
   TalkStatus,
   TalkSummary,
@@ -40,6 +42,7 @@ import { buildDParam } from "../shared/async-request.ts";
 import { withTechTerms } from "../shared/tech-dictionary.ts";
 import { getJob, getSentimentParameters, submitRecording } from "./async-api.ts";
 import { PART_SIZE, Recording } from "./recording.ts";
+import { summarizeTalk } from "./summary.ts";
 
 const SNAPSHOT_LINES = 50;
 /** AmiVoice 接続待ちの間に溜めておく音声の上限（16kHz 16bit で約 15 秒） */
@@ -58,6 +61,19 @@ const REPORT_ENGINE = "-a-general";
 /** 配信中の使用量は、送った音声がこの長さ（60 秒）たまるごとに数える */
 const USAGE_REPORT_BYTES = 16000 * 2 * 60;
 const PCM_BYTES_PER_SECOND = 16000 * 2;
+/** まとめを初めて作るのに要る字幕の文字数（挨拶だけで作らないように） */
+const SUMMARY_FIRST_CHARS = 60;
+/** まとめを作り直すのに要る、前回から増えた字幕の文字数 */
+const SUMMARY_NEW_CHARS = 80;
+/**
+ * まとめを作り直す最短の間隔。登壇が長くなるほど延ばす（経過時間の 1/8 を 15〜60 秒に収める）。
+ * 5 分の LT なら 10 回ほど、30 分の登壇なら 40 回ほどになる
+ */
+const SUMMARY_MIN_INTERVAL_MS = 15_000;
+const SUMMARY_MAX_INTERVAL_MS = 60_000;
+/** 1 回の登壇で作るまとめの回数の上限（費用の歯止め） */
+const SUMMARY_MAX_CALLS = 240;
+const SUMMARY_MAX_FAILURES = 3;
 
 interface LiveConfig {
   engine: string;
@@ -65,6 +81,7 @@ interface LiveConfig {
   useTech: boolean;
   diarization: boolean;
   archive: boolean;
+  summary: boolean;
 }
 
 type JobState = "pending" | "done" | "error";
@@ -104,7 +121,7 @@ export class Room extends DurableObject<Env> {
   private upstream: WebSocket | null = null;
   private upstreamReady = false;
   private wantLive = false;
-  private config: LiveConfig = { engine: "-a-general", useDictionary: true, useTech: true, diarization: false, archive: true };
+  private config: LiveConfig = { engine: "-a-general", useDictionary: true, useTech: true, diarization: false, archive: true, summary: true };
   private terms: DictionaryTerm[] = [];
   /** 今の AmiVoice セッションに渡した辞書のうち、表記に空白を含む語。認識結果に "_" が残っていたら空白に戻す */
   private sessionTerms: DictionaryTerm[] = [];
@@ -128,6 +145,14 @@ export class Room extends DurableObject<Env> {
   private unreportedBytes = 0;
   /** 最後に見た今月の使用量。配信を始めるときの判定に使う（同期的に判定したいので手元に持つ） */
   private usageStatus: UsageStatus | null = null;
+  // ---- まとめ（Claude）。同時に作るのは 1 つだけで、作っている間に字幕が増えたら終わってから見直す ----
+  private summaryBusy = false;
+  /** 作っている間に見直しを頼まれた登壇と、終了後の最後のまとめか */
+  private summaryAgain: { talkId: number; force: boolean } | null = null;
+  private summaryStartedAt = 0;
+  private summaryTimer: ReturnType<typeof setTimeout> | undefined;
+  /** 続けて失敗した回数。API キーの誤りなどで失敗し続けるときに、字幕のたびに呼び続けないようにする */
+  private summaryFailures = 0;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -177,6 +202,13 @@ export class Room extends DurableObject<Env> {
           speaker INTEGER
         );
         CREATE TABLE IF NOT EXISTS reports (talk_id INTEGER PRIMARY KEY, json TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS summaries (
+          talk_id INTEGER PRIMARY KEY,
+          json TEXT NOT NULL,
+          calls INTEGER NOT NULL DEFAULT 0,
+          input_tokens INTEGER NOT NULL DEFAULT 0,
+          output_tokens INTEGER NOT NULL DEFAULT 0
+        );
       `);
       // 配信中に DO が再起動した登壇は、そこまでの録音を回収する
       const stale = ctx.storage.sql.exec("UPDATE talks SET status = 'interrupted' WHERE status = 'live' RETURNING id").toArray();
@@ -243,6 +275,7 @@ export class Room extends DurableObject<Env> {
       live: this.ctx.storage.sql.exec<CaptionRow>("SELECT * FROM captions WHERE talk_id = ? ORDER BY id", talkId).toArray().map(toCaptionLine),
       archive: this.archiveLines(talkId),
       report: report ? (JSON.parse(report.json) as TalkReport) : null,
+      summary: this.loadSummary(talkId),
       sentimentParameters: JSON.parse(this.getMeta("sentiment_params") ?? "null"),
     };
   }
@@ -334,6 +367,8 @@ export class Room extends DurableObject<Env> {
       partial: this.partial,
       terms: this.visibleTerms(),
       viewers: this.ctx.getWebSockets("viewer").length,
+      summary: this.latestSummary(),
+      summaryState: this.summaryBusy ? "working" : "idle",
     };
     server.send(JSON.stringify(snapshot));
     if (role === "speaker") {
@@ -367,6 +402,7 @@ export class Room extends DurableObject<Env> {
         useTech: msg.useTech !== false,
         diarization: msg.diarization === true,
         archive: msg.archive !== false,
+        summary: msg.summary !== false,
       };
       const changed =
         next.engine !== this.config.engine ||
@@ -379,6 +415,7 @@ export class Room extends DurableObject<Env> {
       this.setMeta("use_dictionary", next.useDictionary ? "1" : "0");
       this.setMeta("use_tech", next.useTech ? "1" : "0");
       this.setMeta("diarization", next.diarization ? "1" : "0");
+      this.setMeta("use_summary", next.summary ? "1" : "0");
       // 配信中にエンジンや辞書・話者分離の有無を切り替えたら、新しい設定でセッションを張り直す
       if (this.wantLive && this.upstream && changed) {
         this.broadcast({ type: "room", room: this.roomInfo() });
@@ -444,6 +481,9 @@ export class Room extends DurableObject<Env> {
         });
       }
       this.sendToSpeaker({ type: "talks", talks: this.talkSummaries() });
+      // 前の登壇のまとめを消す
+      this.broadcast({ type: "summary", summary: null });
+      this.summaryFailures = 0;
     }
     this.terms = this.loadTerms();
     this.broadcast({ type: "room", room: this.roomInfo() });
@@ -477,6 +517,8 @@ export class Room extends DurableObject<Env> {
     this.talkId = null;
     this.recording = null;
     if (talkId !== null) this.ctx.waitUntil(this.finishTalk(talkId, recording));
+    // 最後のまとめ。AmiVoice のセッションが残りの確定結果を返している最中なら、閉じたとき（onUpstreamClosed）に作る
+    if (talkId !== null && !this.upstream) this.maybeSummarize(talkId, true);
     this.broadcast({ type: "room", room: this.roomInfo() });
   }
 
@@ -866,15 +908,19 @@ export class Room extends DurableObject<Env> {
     };
     this.broadcast({ type: "final", line });
     this.sendToSpeaker({ type: "stats", stats: this.stats() });
+    this.maybeSummarize(talkId);
   }
 
   private onUpstreamClosed(ws: WebSocket): void {
     if (ws !== this.upstream) return;
     this.upstream = null;
     this.upstreamReady = false;
+    const closedTalkId = this.upstreamTalkId;
     // 次の登壇がもう始まっていたら、前の登壇のセッションの長さは足さない（時刻は登壇ごとに 0 から）
     if (this.upstreamTalkId === this.talkId) this.sessionOffsetMs += pcmBytesToMs(this.sessionAudioBytes);
     this.upstreamTalkId = null;
+    // 終わった登壇の最後の確定結果まで届いたので、最後のまとめを作る（張り直しのときは作らない）
+    if (closedTalkId !== null && closedTalkId !== this.talkId) this.maybeSummarize(closedTalkId, true);
     this.sessionAudioBytes = 0;
     if (this.partial) {
       this.partial = "";
@@ -942,6 +988,119 @@ export class Room extends DurableObject<Env> {
   }
 
   // ------------------------------------------------------------------
+  // ここまでのまとめ（Claude）
+  // ------------------------------------------------------------------
+
+  /**
+   * 字幕が十分たまっていれば、まとめを作り直す。force は登壇の終了後の最後のまとめで、量と間隔を問わない。
+   * 間隔が足りないだけなら、間隔が空いたときに見直す。
+   */
+  private maybeSummarize(talkId: number, force = false): void {
+    if (!this.env.ANTHROPIC_API_KEY || this.getMeta("use_summary") === "0") return;
+    if (this.summaryFailures >= SUMMARY_MAX_FAILURES && !force) return;
+    if (this.summaryBusy) {
+      this.summaryAgain = { talkId, force: force || (this.summaryAgain?.talkId === talkId && this.summaryAgain.force) };
+      return;
+    }
+    const meta = this.ctx.storage.sql
+      .exec<{ json: string; calls: number }>("SELECT json, calls FROM summaries WHERE talk_id = ?", talkId)
+      .toArray()[0];
+    const previous = meta ? (JSON.parse(meta.json) as LiveSummary) : null;
+    if ((meta?.calls ?? 0) >= SUMMARY_MAX_CALLS) return;
+    const fresh = this.ctx.storage.sql
+      .exec<{ chars: number; n: number }>(
+        "SELECT COALESCE(SUM(LENGTH(text)), 0) AS chars, COUNT(*) AS n FROM captions WHERE talk_id = ? AND id > ?",
+        talkId,
+        previous?.upToLineId ?? 0,
+      )
+      .one();
+    if (fresh.n === 0) return;
+    if (!force) {
+      if (fresh.chars < (previous ? SUMMARY_NEW_CHARS : SUMMARY_FIRST_CHARS)) return;
+      const startedAt = this.talkRow(talkId)?.started_at ?? Date.now();
+      const interval = Math.min(SUMMARY_MAX_INTERVAL_MS, Math.max(SUMMARY_MIN_INTERVAL_MS, (Date.now() - startedAt) / 8));
+      const wait = this.summaryStartedAt + interval - Date.now();
+      if (wait > 0) {
+        clearTimeout(this.summaryTimer);
+        this.summaryTimer = setTimeout(() => this.maybeSummarize(talkId), wait);
+        return;
+      }
+    }
+    clearTimeout(this.summaryTimer);
+    this.summaryBusy = true;
+    this.summaryStartedAt = Date.now();
+    this.broadcast({ type: "summary-state", state: "working" });
+    this.ctx.waitUntil(
+      this.runSummary(talkId, previous).finally(() => {
+        this.summaryBusy = false;
+        const again = this.summaryAgain;
+        this.summaryAgain = null;
+        if (again) this.maybeSummarize(again.talkId, again.force);
+      }),
+    );
+  }
+
+  private async runSummary(talkId: number, previous: LiveSummary | null): Promise<void> {
+    const lines = this.ctx.storage.sql.exec<CaptionRow>("SELECT * FROM captions WHERE talk_id = ? ORDER BY id", talkId).toArray().map(toCaptionLine);
+    const last = lines.at(-1);
+    if (!last) return;
+    let state: SummaryState = "idle";
+    let message: string | undefined;
+    try {
+      const { summary, usage } = await summarizeTalk(this.env.ANTHROPIC_API_KEY!, {
+        title: this.getMeta("title") ?? "",
+        lines,
+        dictionary: this.loadTerms(),
+        previous,
+        speakers: lines.some((l) => l.speaker !== undefined),
+      });
+      const full: LiveSummary = { talkId, upToLineId: last.id, upToMs: last.endMs, updatedAt: Date.now(), ...summary };
+      this.ctx.storage.sql.exec(
+        `INSERT INTO summaries (talk_id, json, calls, input_tokens, output_tokens) VALUES (?, ?, 1, ?, ?)
+         ON CONFLICT(talk_id) DO UPDATE SET json = excluded.json, calls = calls + 1,
+           input_tokens = input_tokens + excluded.input_tokens, output_tokens = output_tokens + excluded.output_tokens`,
+        talkId,
+        JSON.stringify(full),
+        usage.inputTokens,
+        usage.outputTokens,
+      );
+      this.summaryFailures = 0;
+      // 作っている間に次の登壇が始まっていたら、画面には出さない（記録には残す）
+      if (this.latestTalkId() === talkId) this.broadcast({ type: "summary", summary: full });
+    } catch (err) {
+      console.error("まとめを作れませんでした", errorMessage(err));
+      this.summaryFailures++;
+      state = "error";
+      message = `まとめを作れませんでした: ${errorMessage(err)}`;
+      if (this.summaryFailures >= SUMMARY_MAX_FAILURES) message += "（続けて失敗したため、この登壇ではもう作りません）";
+    }
+    // 参加者には「作り終えた」ことだけを伝え、失敗の理由は登壇者にだけ見せる
+    for (const ws of this.ctx.getWebSockets()) {
+      const isSpeaker = this.ctx.getTags(ws).includes("speaker");
+      try {
+        ws.send(JSON.stringify({ type: "summary-state", state: isSpeaker ? state : "idle", message: isSpeaker ? message : undefined } satisfies ServerMessage));
+      } catch {
+        // 切断済み
+      }
+    }
+  }
+
+  private loadSummary(talkId: number): LiveSummary | null {
+    const row = this.ctx.storage.sql.exec<{ json: string }>("SELECT json FROM summaries WHERE talk_id = ?", talkId).toArray()[0];
+    return row ? (JSON.parse(row.json) as LiveSummary) : null;
+  }
+
+  /** いちばん新しい登壇のまとめ。その登壇でまだ作っていなければ null（前の登壇のまとめは出さない） */
+  private latestSummary(): LiveSummary | null {
+    const talkId = this.latestTalkId();
+    return talkId === null ? null : this.loadSummary(talkId);
+  }
+
+  private latestTalkId(): number | null {
+    return this.ctx.storage.sql.exec<{ id: number | null }>("SELECT MAX(id) AS id FROM talks").one().id;
+  }
+
+  // ------------------------------------------------------------------
   // 補助
   // ------------------------------------------------------------------
 
@@ -963,6 +1122,7 @@ export class Room extends DurableObject<Env> {
       useDictionary: (this.getMeta("use_dictionary") ?? "1") === "1",
       useTech: this.getMeta("use_tech") !== "0",
       diarization: this.getMeta("diarization") === "1",
+      summary: this.getMeta("use_summary") !== "0" && Boolean(this.env.ANTHROPIC_API_KEY),
       recording: this.wantLive && this.config.archive,
     };
   }

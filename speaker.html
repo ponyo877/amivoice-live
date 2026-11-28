@@ -118,6 +118,7 @@
         <p class="live-help">
           <span><kbd>F</kbd> プレゼン表示</span><span><kbd>T</kbd> 書き起こし表示</span><span><kbd>Esc</kbd> 全画面を閉じる</span>
         </p>
+        <section class="summary-card speaker-summary" id="summary" aria-label="ここまでのまとめ"></section>
       </section>
 
       <!-- 辞書 -->
@@ -330,6 +331,10 @@
         <label class="switch-row">
           <span>録音してアーカイブを作る<small>終了後に字幕を作り直し、振り返りをまとめる</small></span>
           <input type="checkbox" class="switch" id="archive" checked />
+        </label>
+        <label class="switch-row">
+          <span>ここまでのまとめを図解する<small>字幕がたまるたびに Claude が要約と図を作り直し、参加者の画面に出す</small></span>
+          <input type="checkbox" class="switch" id="use-summary" checked />
         </label>
       </div>
     </div>

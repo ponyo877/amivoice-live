@@ -37,18 +37,27 @@
         </button>
       </div>
 
-      <section class="caption-card" aria-label="字幕">
-        <div class="caption-stage" id="stage">
-          <div class="caption-empty" id="empty">
-            <span class="empty-icon"><svg class="i" aria-hidden="true"><use href="/icons.svg#mic" /></svg></span>
-            <p id="empty-text">登壇者が配信を始めるのを待っています…</p>
+      <div class="viewer-switch tabs full" role="tablist" aria-label="表示の切り替え">
+        <button type="button" role="tab" id="pane-captions" aria-selected="true" aria-controls="caption-card">字幕</button>
+        <button type="button" role="tab" id="pane-summary" aria-selected="false" aria-controls="summary" tabindex="-1">まとめ<span class="switch-dot" id="summary-dot" hidden></span></button>
+      </div>
+
+      <div class="viewer-panes" id="panes" data-pane="captions">
+        <section class="caption-card" id="caption-card" aria-label="字幕">
+          <button type="button" class="now-bar" id="now-bar" hidden><span class="now-bar-label">いま</span><span class="now-bar-text" id="now-text"></span></button>
+          <div class="caption-stage" id="stage">
+            <div class="caption-empty" id="empty">
+              <span class="empty-icon"><svg class="i" aria-hidden="true"><use href="/icons.svg#mic" /></svg></span>
+              <p id="empty-text">登壇者が配信を始めるのを待っています…</p>
+            </div>
           </div>
-        </div>
-        <button type="button" class="jump" id="jump" hidden>
-          <svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-down" /></svg>最新の字幕へ
-        </button>
-        <p class="legend" id="legend" hidden></p>
-      </section>
+          <button type="button" class="jump" id="jump" hidden>
+            <svg class="i" aria-hidden="true"><use href="/icons.svg#arrow-down" /></svg>最新の字幕へ
+          </button>
+          <p class="legend" id="legend" hidden></p>
+        </section>
+        <section class="summary-card" id="summary" aria-label="ここまでのまとめ"></section>
+      </div>
 
       <div class="viewer-actions">
         <button type="button" class="btn" id="theme"><svg class="i" aria-hidden="true"><use href="/icons.svg#sun" /></svg><span>明るく</span></button>
