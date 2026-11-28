@@ -11,6 +11,7 @@
 - 登壇スライドの PDF から、誤認識されやすい技術用語とその読みを Claude が抜き出し、AmiVoice API のユーザー辞書（`profileWords`）に登録します。
 - Zenn の技術記事 1,641 本によく出る技術用語 1,830 語の辞書を前もって用意し、スライドの辞書に重ねて渡します（ハイブリッドエンジンだけ。登壇者の画面の設定で外せます）。
 - 参加者は QR コードを読むだけで、手元のスマホで字幕を追えます。プロジェクターや OBS に重ねる透過表示もあります。
+- 配信中は、字幕が少したまるたびに Claude がそれまでの話の内容をまとめ直し、論旨の図（問題・原因・対策・道具などの節と矢印）、話の流れ、用語の説明、質疑応答を、参加者の画面に字幕と並べて出します。いま話している内容にあたる節には「いま」の印が付きます。
 - 質疑応答で話者が替わると、AmiVoice の話者ダイアライゼーションで話者ごとに色を分けます。
 - 認識エンジンが自信を持てなかった語（信頼度の低い語）を点線で示します。読み手は「ここは誤認識かもしれない」と分かります。
 - 登壇が終わると、録音を AmiVoice の非同期 HTTP API で認識し直し、精度の高いアーカイブ字幕（話者付きの WebVTT・Markdown）を作ります。
@@ -27,7 +28,8 @@ flowchart LR
   Worklet -- WebSocket（100ms ごとの PCM） --> DO
   subgraph Cloudflare
     W[Worker<br/>/api/*] --> DO[Durable Object<br/>1 勉強会 = 1 インスタンス]
-    W -- PDF --> Claude[Claude API<br/>用語と読みの抽出]
+    W -- PDF --> Claude[Claude API<br/>用語と読みの抽出<br/>まとめと図解]
+    DO -- 確定した字幕 --> Claude
   end
   DO -- WebSocket（s コマンド + p パケット） --> Ami[AmiVoice API<br/>wss://acp-api.amivoice.com/v1/nolog/]
   Ami -- 途中結果 U / 確定結果 A --> DO
@@ -83,6 +85,13 @@ npm run dev
 
 ```sh
 node scripts/smoke.ts --audio 音声ファイル --base http://localhost:5173 --diarization
+```
+
+下の「精度と遅延を測る」で記録した AmiVoice の実際の応答（`eval/out/*.jsonl`）を、届いた音声の長さに合わせて返し直すこともできます。AmiVoice を使わずに本物の字幕で画面やまとめを確かめるときに使います（まとめを作るには `.dev.vars` に本物の `ANTHROPIC_API_KEY` が要ります）。
+
+```sh
+MOCK_REPLAY=eval/out/rag.a-general.slides.jsonl npm run mock
+node scripts/smoke.ts --mock --audio eval/data/rag.wav --dictionary eval/data/rag.slides.dict.json --no-archive --base http://localhost:5173
 ```
 
 ### デプロイ
@@ -206,6 +215,9 @@ npm run build
 | `src/worker/async-api.ts` | 非同期 HTTP API のクライアント（録音をストリームのまま送る） |
 | `src/worker/usage.ts` | 月ごとの使用量を数え、上限を超える配信やジョブを止める Durable Object |
 | `src/worker/terms.ts` | スライドからの用語抽出と、書き起こしからの辞書の提案（Claude の構造化出力） |
+| `src/worker/summary.ts` | 配信中の「ここまでのまとめ」を Claude に作らせる（前回のまとめを渡して書き足させる） |
+| `src/client/summary.ts` | まとめと図の描画（前の位置から節を動かし、矢印が節の裏を通らないように隙間を通す） |
+| `src/shared/diagram-layout.ts` | 図の節を段に分けて並べる（層状のグラフ描画） |
 | `src/shared/tech-dictionary.ts` | Zenn の記事から作った技術用語の辞書を、ルームの辞書に重ねる（表記や読みが重なる語はルームの辞書を優先） |
 | `scripts/tech-dictionary/` | 技術用語の辞書を作るスクリプト（記事の収集、候補の数え上げ、Claude による選別、組み立て） |
 | `src/client/` | 登壇者・参加者・振り返り・トップの各画面 |
