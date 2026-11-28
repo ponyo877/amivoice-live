@@ -37,6 +37,7 @@ import type {
   UsageStatus,
 } from "../shared/protocol.ts";
 import { buildDParam } from "../shared/async-request.ts";
+import { withTechTerms } from "../shared/tech-dictionary.ts";
 import { getJob, getSentimentParameters, submitRecording } from "./async-api.ts";
 import { PART_SIZE, Recording } from "./recording.ts";
 
@@ -61,6 +62,7 @@ const PCM_BYTES_PER_SECOND = 16000 * 2;
 interface LiveConfig {
   engine: string;
   useDictionary: boolean;
+  useTech: boolean;
   diarization: boolean;
   archive: boolean;
 }
@@ -102,8 +104,10 @@ export class Room extends DurableObject<Env> {
   private upstream: WebSocket | null = null;
   private upstreamReady = false;
   private wantLive = false;
-  private config: LiveConfig = { engine: "-a-general", useDictionary: true, diarization: false, archive: true };
+  private config: LiveConfig = { engine: "-a-general", useDictionary: true, useTech: true, diarization: false, archive: true };
   private terms: DictionaryTerm[] = [];
+  /** 今の AmiVoice セッションに渡した辞書のうち、表記に空白を含む語。認識結果に "_" が残っていたら空白に戻す */
+  private sessionTerms: DictionaryTerm[] = [];
   private pendingAudio: Uint8Array[] = [];
   private pendingBytes = 0;
   private talkId: number | null = null;
@@ -360,17 +364,20 @@ export class Room extends DurableObject<Env> {
       const next: LiveConfig = {
         engine,
         useDictionary: msg.useDictionary,
+        useTech: msg.useTech !== false,
         diarization: msg.diarization === true,
         archive: msg.archive !== false,
       };
       const changed =
         next.engine !== this.config.engine ||
         next.useDictionary !== this.config.useDictionary ||
+        (next.useTech !== this.config.useTech && engineKind(next.engine) === "hybrid") ||
         next.diarization !== this.config.diarization;
       // 録音するかどうかは登壇の途中では変えない
       this.config = this.wantLive ? { ...next, archive: this.config.archive } : next;
       this.setMeta("engine", engine);
       this.setMeta("use_dictionary", next.useDictionary ? "1" : "0");
+      this.setMeta("use_tech", next.useTech ? "1" : "0");
       this.setMeta("diarization", next.diarization ? "1" : "0");
       // 配信中にエンジンや辞書・話者分離の有無を切り替えたら、新しい設定でセッションを張り直す
       if (this.wantLive && this.upstream && changed) {
@@ -561,7 +568,8 @@ export class Room extends DurableObject<Env> {
 
   private async submitJobs(row: TalkRow): Promise<void> {
     // 辞書を使うかどうかはその登壇の設定に合わせる。語は今の辞書を使うので、振り返りで足した語は作り直しに効く
-    const terms = this.loadTerms();
+    // 技術用語の辞書を重ねるかどうかも、今の設定に合わせる
+    const terms = this.getMeta("use_tech") === "0" ? this.loadTerms() : withTechTerms(this.loadTerms());
     const useDictionary = row.dictionary === 1;
     const usage = this.env.USAGE.getByName("global");
     const seconds = row.audio_bytes / PCM_BYTES_PER_SECOND;
@@ -639,11 +647,12 @@ export class Room extends DurableObject<Env> {
     const utterances = asyncUtterances(job);
     const indexes = speakerIndexes(utterances);
     this.ctx.storage.sql.exec("DELETE FROM archive_captions WHERE talk_id = ?", talkId);
+    const spaced = withTechTerms(this.loadTerms()).filter((t) => /\s/.test(t.written));
     for (const u of utterances) {
       this.ctx.storage.sql.exec(
         "INSERT INTO archive_captions (talk_id, text, start_ms, end_ms, speaker) VALUES (?, ?, ?, ?, ?)",
         talkId,
-        decodeWritten(u.text, this.terms),
+        decodeWritten(u.text, spaced),
         Math.round(u.startMs),
         Math.round(u.endMs),
         u.label !== undefined ? (indexes.get(u.label) ?? null) : null,
@@ -709,7 +718,11 @@ export class Room extends DurableObject<Env> {
     this.sendToSpeaker({ type: "upstream", state: "connecting" });
 
     const kind = engineKind(this.config.engine);
-    const profileWords = this.config.useDictionary ? buildProfileWords(this.terms, kind) : "";
+    // 技術用語の辞書は数千語あるので、読みで照合するハイブリッドエンジンにだけ重ねる。
+    // E2E エンジンの単語強調は語ごとに認識を寄せる仕組みで、これだけの語数を強調したときの影響は測っていない
+    const terms = !this.config.useDictionary ? [] : kind === "hybrid" && this.config.useTech ? withTechTerms(this.terms) : this.terms;
+    this.sessionTerms = terms.filter((t) => /\s/.test(t.written));
+    const profileWords = buildProfileWords(terms, kind);
     const command = buildStartCommand({
       engine: this.config.engine,
       authorization: apiKey,
@@ -770,7 +783,7 @@ export class Room extends DurableObject<Env> {
         this.lastEnd = { audioMs: ev.time, at: Date.now() };
         return;
       case "U": {
-        const text = decodeWritten(ev.result.text ?? "", this.terms);
+        const text = decodeWritten(ev.result.text ?? "", this.sessionTerms);
         if (text === this.partial) return;
         this.partial = text;
         this.broadcast({ type: "partial", text });
@@ -789,7 +802,7 @@ export class Room extends DurableObject<Env> {
   }
 
   private onFinal(result: RecognitionResult): void {
-    const text = decodeWritten(result.text ?? "", this.terms).trim();
+    const text = decodeWritten(result.text ?? "", this.sessionTerms).trim();
     const talkId = this.upstreamTalkId;
     this.partial = "";
     if (!text || talkId === null) {
@@ -814,7 +827,7 @@ export class Room extends DurableObject<Env> {
     }
     // 信頼度（ハイブリッドエンジンでは読みも残し、辞書の候補づくりに使う）
     const stored = tokens.map((t) => {
-      const entry: [string, number, string?] = [decodeWritten(t.written, this.terms), round2(t.confidence ?? 1)];
+      const entry: [string, number, string?] = [decodeWritten(t.written, this.sessionTerms), round2(t.confidence ?? 1)];
       if (t.spoken && t.spoken !== "_") entry.push(t.spoken);
       return entry;
     });
@@ -948,6 +961,7 @@ export class Room extends DurableObject<Env> {
       live: this.wantLive,
       engine: this.getMeta("engine") ?? this.config.engine,
       useDictionary: (this.getMeta("use_dictionary") ?? "1") === "1",
+      useTech: this.getMeta("use_tech") !== "0",
       diarization: this.getMeta("diarization") === "1",
       recording: this.wantLive && this.config.archive,
     };

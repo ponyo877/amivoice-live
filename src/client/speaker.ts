@@ -37,6 +37,7 @@ const micSel = $<HTMLSelectElement>("mic");
 const fileInput = $<HTMLInputElement>("audio-file");
 const engineSel = $<HTMLSelectElement>("engine");
 const useDict = $<HTMLInputElement>("use-dictionary");
+const useTech = $<HTMLInputElement>("use-tech");
 const diarization = $<HTMLInputElement>("diarization");
 const archive = $<HTMLInputElement>("archive");
 const toggle = $<HTMLButtonElement>("toggle");
@@ -55,6 +56,12 @@ engineSel.addEventListener("change", () => {
   if (capture) sendStart();
 });
 useDict.addEventListener("change", () => {
+  if (capture) sendStart();
+});
+useTech.checked = localStorage.getItem("speaker-use-tech") !== "0";
+useTech.addEventListener("change", () => {
+  localStorage.setItem("speaker-use-tech", useTech.checked ? "1" : "0");
+  renderTechSummary();
   if (capture) sendStart();
 });
 diarization.checked = localStorage.getItem("speaker-diarization") === "1";
@@ -242,6 +249,7 @@ function sendStart(): void {
       type: "start",
       engine: engineSel.value,
       useDictionary: useDict.checked,
+      useTech: useTech.checked,
       diarization: diarization.checked,
       archive: archive.checked,
     }),
@@ -583,6 +591,57 @@ async function loadTerms(): Promise<void> {
   renderTerms();
 }
 void loadTerms();
+
+// ---- Zenn の技術用語の辞書（どのルームでも最初から重ねる共通の辞書） ----
+interface TechList {
+  source: string;
+  articles: number;
+  terms: { written: string; readings: string[]; df: number }[];
+}
+let tech: TechList | null = null;
+const TECH_SHOWN = 200;
+
+function renderTechSummary(): void {
+  if (!tech) return;
+  const total = tech.terms.length.toLocaleString("ja-JP");
+  $("tech-count").textContent = total;
+  $("tech-title").textContent = useTech.checked ? `Zenn の技術用語 ${total} 語も重ねて使います` : `Zenn の技術用語 ${total} 語は、いまは使っていません`;
+  $("tech-note").textContent =
+    `Zenn の技術記事 ${tech.articles.toLocaleString("ja-JP")} 本によく出る、英字の製品名や略語の辞書です。` +
+    (useTech.checked ? "スライドの辞書と表記や読みが重なる語は、スライドの辞書を優先します。" : "") +
+    "使うかどうかは設定で切り替えられます（ハイブリッドのエンジンだけで使います）。";
+}
+
+function renderTechList(): void {
+  if (!tech) return;
+  const q = $<HTMLInputElement>("tech-search").value.trim().toLowerCase();
+  const hits = q ? tech.terms.filter((t) => t.written.toLowerCase().includes(q) || t.readings.some((r) => r.includes(normalizeReading(q)))) : tech.terms;
+  const list = $("tech-list");
+  list.replaceChildren(
+    ...hits.slice(0, TECH_SHOWN).map((t) => {
+      const li = document.createElement("li");
+      const w = document.createElement("strong");
+      w.textContent = t.written;
+      const r = document.createElement("span");
+      r.textContent = t.readings.join("、");
+      li.title = `${t.df} 本の記事に出てきた語`;
+      li.append(w, r);
+      return li;
+    }),
+  );
+  $("tech-more").textContent =
+    hits.length > TECH_SHOWN ? `記事に多く出てくる順に ${TECH_SHOWN} 語を表示しています（${hits.length.toLocaleString("ja-JP")} 語中）。絞り込むと残りも探せます。` : hits.length === 0 ? "当てはまる語はありません。" : "";
+}
+
+async function loadTech(): Promise<void> {
+  const res = await fetch("/api/tech-dictionary");
+  if (!res.ok) return;
+  tech = (await res.json()) as TechList;
+  renderTechSummary();
+  renderTechList();
+}
+void loadTech();
+$("tech-search").addEventListener("input", renderTechList);
 
 $("add-term").addEventListener("click", () => {
   terms.push({ written: "", readings: [], source: "手入力" });

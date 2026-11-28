@@ -147,6 +147,24 @@
             <button type="button" class="btn primary" id="extract"><svg class="i" aria-hidden="true"><use href="/icons.svg#sparkles" /></svg>語を抜き出す</button>
           </div>
         </div>
+        <details class="card tech-card" id="tech-card">
+          <summary>
+            <span class="tech-mark"><svg class="i" aria-hidden="true"><use href="/icons.svg#book" /></svg></span>
+            <span class="tech-text">
+              <strong id="tech-title">Zenn の技術用語も重ねて使います</strong>
+              <small id="tech-note">Zenn の技術記事によく出る、英字の製品名や略語の辞書です。スライドの辞書と表記や読みが重なる語は、スライドの辞書を優先します。使うかどうかは設定で切り替えられます。</small>
+            </span>
+            <span class="tech-open">一覧<svg class="i" aria-hidden="true"><use href="/icons.svg#chevron-down" /></svg></span>
+          </summary>
+          <div class="tech-body">
+            <label class="tech-search">
+              <svg class="i" aria-hidden="true"><use href="/icons.svg#search" /></svg>
+              <input type="search" id="tech-search" placeholder="表記や読みで絞り込む" aria-label="技術用語を表記や読みで絞り込む" />
+            </label>
+            <ul class="tech-list" id="tech-list"></ul>
+            <p class="hint" id="tech-more"></p>
+          </div>
+        </details>
         <p class="status" id="dict-status" role="status"></p>
         <p class="status is-warning" id="dict-warning" role="status"></p>
         <div class="card table-card">
@@ -300,6 +318,10 @@
         <label class="switch-row">
           <span>辞書を使う<small>いまの辞書: <span id="term-count">0</span> 語</small></span>
           <input type="checkbox" class="switch" id="use-dictionary" checked />
+        </label>
+        <label class="switch-row">
+          <span>Zenn の技術用語も使う<small>記事によく出る <span id="tech-count">–</span> 語。ハイブリッドのエンジンだけ</small></span>
+          <input type="checkbox" class="switch" id="use-tech" checked />
         </label>
         <label class="switch-row">
           <span>話者を色分けする<small>質疑応答で、話し手ごとに色の帯を付ける</small></span>

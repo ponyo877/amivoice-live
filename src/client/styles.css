@@ -2401,6 +2401,116 @@ body.app {
   justify-self: end;
 }
 
+/* Zenn の技術用語の辞書。スライドの辞書の表より一段控えめにし、開くと語の一覧が出る */
+.tech-card > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+.tech-card > summary::-webkit-details-marker {
+  display: none;
+}
+.tech-mark {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+.tech-text {
+  display: grid;
+  gap: 0.15rem;
+}
+.tech-text strong {
+  font-size: 0.93rem;
+}
+.tech-text small {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tech-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.tech-open .i {
+  transition: transform 0.15s;
+}
+.tech-card[open] .tech-open .i {
+  transform: rotate(180deg);
+}
+.tech-body {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.85rem;
+}
+.tech-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 22rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+}
+.tech-search .i {
+  color: var(--muted);
+}
+.tech-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.88rem;
+  outline: none;
+}
+.tech-search:focus-within {
+  border-color: var(--accent-line);
+}
+.tech-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.15rem 1.25rem;
+  max-height: 18rem;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tech-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.tech-list strong {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tech-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 .table-card {
   overflow: hidden;
 }

@@ -4,6 +4,7 @@ import { normalizeTerms, extractTerms, suggestTerms } from "./terms.ts";
 import type { DictionaryTerm } from "../shared/amivoice.ts";
 import type { CaptionLine } from "../shared/protocol.ts";
 import { wavHeader } from "../shared/async-request.ts";
+import { TECH_DICTIONARY } from "../shared/tech-dictionary.ts";
 
 export { Room } from "./room.ts";
 export { UsageMeter } from "./usage.ts";
@@ -15,6 +16,11 @@ export default {
     const url = new URL(request.url);
     try {
       if (url.pathname === "/api/rooms" && request.method === "POST") return await createRoom(request, env, url);
+      // 技術用語の辞書（登壇者の画面で語の一覧を見せる）。デプロイのたびに変わるだけなので、1 日キャッシュさせる
+      if (url.pathname === "/api/tech-dictionary" && request.method === "GET") {
+        const { source, builtAt, articles, terms } = TECH_DICTIONARY;
+        return json({ source, builtAt, articles, terms: terms.map((t) => ({ written: t.written, readings: t.readings, df: t.df })) }, 200, { "cache-control": "public, max-age=86400" });
+      }
 
       const m = url.pathname.match(/^\/api\/rooms\/([a-z0-9]{6,32})(\/.*)?$/);
       if (m) return await roomRoute(request, env, m[1]!, m[2] ?? "", url);
@@ -176,8 +182,8 @@ function escapeVtt(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/-->/g, "--&gt;");
 }
 
-function json(data: unknown, status = 200): Response {
-  return Response.json(data, { status });
+function json(data: unknown, status = 200, headers?: HeadersInit): Response {
+  return Response.json(data, { status, headers });
 }
 
 function randomId(length: number): string {

@@ -25,6 +25,8 @@ export interface RoomInfo {
   live: boolean;
   engine: string;
   useDictionary: boolean;
+  /** ルームの辞書に Zenn の技術用語の辞書を重ねる（ハイブリッドエンジンだけ） */
+  useTech: boolean;
   diarization: boolean;
   /** 配信中で、音声を録音している（アーカイブを作る）。参加者の画面に録音中であることを示す */
   recording: boolean;
@@ -99,7 +101,7 @@ export interface UsageStatus {
 
 /** 登壇者クライアント → DO（音声はバイナリフレームで別送） */
 export type SpeakerMessage =
-  | { type: "start"; engine: string; useDictionary: boolean; diarization: boolean; archive: boolean }
+  | { type: "start"; engine: string; useDictionary: boolean; useTech?: boolean; diarization: boolean; archive: boolean }
   | { type: "stop" };
 
 export interface DictionaryPayload {
