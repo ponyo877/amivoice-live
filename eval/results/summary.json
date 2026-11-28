@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-26T07:07:11.549Z",
+ "generatedAt": "2026-11-28T05:19:42.807Z",
  "rows": [
   {
    "mode": "ライブ",
@@ -717,6 +717,96 @@
    "missedTerms": [
     "Cohere Rerank×1",
     "Workers×1"
+   ]
+  },
+  {
+   "mode": "ライブ",
+   "engine": "-a-general",
+   "dictionary": "slidestech",
+   "variant": "静か",
+   "postTime": null,
+   "emphasis": null,
+   "diarization": false,
+   "options": "",
+   "talks": [
+    "rag",
+    "rust",
+    "workers"
+   ],
+   "cer": 0.03465818759936407,
+   "termRecall": 0.9866666666666667,
+   "termHits": 74,
+   "termTotal": 75,
+   "finalizeP50": 158,
+   "finalizeP90": 229,
+   "lagP50": 408,
+   "lagP90": 508,
+   "firstPartialP50": 327,
+   "utterances": 111,
+   "speakerAccuracy": null,
+   "questionerRecall": null,
+   "fillerDetected": null,
+   "elapsedP50": null,
+   "missedTerms": [
+    "Cohere Rerank×1"
+   ]
+  },
+  {
+   "mode": "ライブ",
+   "engine": "-a-general",
+   "dictionary": "tech",
+   "variant": "静か",
+   "postTime": null,
+   "emphasis": null,
+   "diarization": false,
+   "options": "",
+   "talks": [
+    "rag",
+    "rust",
+    "workers"
+   ],
+   "cer": 0.10206677265500795,
+   "termRecall": 0.5333333333333333,
+   "termHits": 40,
+   "termTotal": 75,
+   "finalizeP50": 164,
+   "finalizeP90": 253,
+   "lagP50": 408,
+   "lagP90": 512,
+   "firstPartialP50": 301,
+   "utterances": 111,
+   "speakerAccuracy": null,
+   "questionerRecall": null,
+   "fillerDetected": null,
+   "elapsedP50": null,
+   "missedTerms": [
+    "RAG×3",
+    "Tokio×3",
+    "Recall@10×2",
+    "Rust×2",
+    "Future×2",
+    "Hibernation API×2",
+    "Embedding×1",
+    "nDCG×1",
+    "HNSW×1",
+    "LLM-as-a-Judge×1",
+    "Ragas×1",
+    "axum×1",
+    "serde×1",
+    "Arc×1",
+    "spawn_blocking×1",
+    "select×1",
+    "tokio-console×1",
+    "tracing×1",
+    "Send×1",
+    "borrow checker×1",
+    "crates.io×1",
+    "Cargo×1",
+    "blockConcurrencyWhile×1",
+    "fetch×1",
+    "Cron Triggers×1",
+    "setAlarm×1",
+    "Miniflare×1"
    ]
   },
   {

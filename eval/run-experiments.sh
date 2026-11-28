@@ -6,12 +6,12 @@
 #
 #   AMIVOICE_API_KEY=... ANTHROPIC_API_KEY=... sh eval/run-experiments.sh [段階...]
 #
-# 段階: corpus dict live posttime emphasis diarization async summary（省略するとすべて）
+# 段階: corpus dict live posttime emphasis diarization async tech summary（省略するとすべて）
 # アプリを通した確認（ライブ → 録音 → アーカイブと振り返り）は、npm run dev のあとで scripts/smoke.ts を使う。
 set -u
 cd "$(dirname "$0")/.."
 IDS="workers rust rag"
-STEPS="${*:-corpus dict live posttime emphasis diarization async summary}"
+STEPS="${*:-corpus dict live posttime emphasis diarization async tech summary}"
 has() { case " $STEPS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 # 1 つの組み合わせが失敗しても残りは流し、最後に失敗があったことを終了コードで返す
 FAILED=0
@@ -71,7 +71,21 @@ if has async; then
   done
 fi
 
-# 7. まとめ
+# 7. Zenn の技術用語の辞書（src/shared/tech-dictionary.json）: スライドの辞書なしで使う／スライドの辞書に重ねる。
+#    模擬 LT 3 本 × 2 通り（約 20 分）と、eval/data/real/ に置いた実際の登壇の録音 × 1 通り（3 本で約 15 分）
+if has tech; then
+  node eval/tech-dictionary.ts || exit 1
+  for id in $IDS; do
+    run node eval/stream.ts --audio "eval/data/$id.wav" --engine=-a-general --skip-existing \
+      --dictionary "eval/data/$id.tech.dict.json" --dictionary "eval/data/$id.slidestech.dict.json" --parallel 2
+  done
+  for wav in eval/data/real/*.wav; do
+    [ -f "$wav" ] || continue
+    run node eval/stream.ts --audio "$wav" --engine=-a-general --skip-existing --dictionary "${wav%.wav}.tech.dict.json"
+  done
+fi
+
+# 8. まとめ
 if has summary; then
   mkdir -p eval/results/dictionaries
   # Claude の出力は実行のたびに少し変わるので、実験に使った辞書を残す
@@ -85,5 +99,12 @@ if has summary; then
       eval/out/$id.a2-ja-general.nodict.jsonl eval/out/$id.a2-ja-general.slides.jsonl \
       eval/out/$id.a-general.slides.spk.async.json eval/out/$id.a2b-ja-general.slides.spk.async.json > "eval/results/examples-$id.md" || FAILED=1
   done
+  # Zenn の技術用語の辞書を、なし／技術用語だけ／スライドだけ／スライド＋技術用語で比べる
+  for id in $IDS; do
+    echo "## $id"
+    node eval/examples.ts "$id" eval/out/$id.a-general.nodict.jsonl eval/out/$id.a-general.tech.jsonl \
+      eval/out/$id.a-general.slides.jsonl eval/out/$id.a-general.slidestech.jsonl || FAILED=1
+    echo
+  done > eval/results/examples-tech.md
 fi
 exit "$FAILED"

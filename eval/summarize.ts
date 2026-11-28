@@ -51,7 +51,7 @@ interface FileScore extends Condition {
   terms: { term: string; inReference: number; inHypothesis: number }[];
 }
 
-const DICT_NAMES: Record<string, string> = { nodict: "なし", slides: "スライドから", oracle: "理想" };
+const DICT_NAMES: Record<string, string> = { nodict: "なし", slides: "スライドから", oracle: "理想", tech: "Zenn の技術用語", slidestech: "スライド＋技術用語" };
 
 function talkOf(audio: string): { talk: string; variant: "静か" | "会場" } {
   const stem = basename(audio).replace(/\.[^.]+$/, "");

@@ -152,3 +152,20 @@
 {"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"label":"smoke probe.wav アーカイブ"}
 {"at":"2026-11-27T12:40:34.632Z","month":"2026-11","api":"async","engine":"-a-general","seconds":30,"sentiment":true,"label":"smoke probe.wav 振り返り"}
 {"at":"2026-11-27T14:37:20.935Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":24,"label":"記事の GIF（rust.wav の冒頭 24 秒、ライブ字幕のみ）"}
+{"at":"2026-11-28T04:36:32.007Z","month":"2026-11","api":"async","engine":"-a-general","seconds":1,"label":"非同期 HTTP API に技術用語の辞書（約 2,400 語）を渡せるかの確認（無音 1 秒）"}
+{"at":"2026-11-28T04:36:58.628Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=slidestech"}
+{"at":"2026-11-28T04:36:58.632Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":192.5,"label":"stream rust -a-general 辞書=tech"}
+{"at":"2026-11-28T04:36:58.735Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":254.8,"label":"stream 0KOvMZw79-E -a-general 辞書=tech"}
+{"at":"2026-11-28T04:36:58.749Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=tech"}
+{"at":"2026-11-28T04:36:58.764Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":214.3,"label":"stream workers -a-general 辞書=slidestech"}
+{"at":"2026-11-28T04:36:58.771Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=slidestech"}
+{"at":"2026-11-28T04:36:58.787Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":282.2,"label":"stream m1Y1QhJUN2k -a-general 辞書=tech"}
+{"at":"2026-11-28T04:36:58.792Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":344.9,"label":"stream gRz3W8uGnaQ -a-general 辞書=tech"}
+{"at":"2026-11-28T04:36:58.793Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":203.5,"label":"stream rag -a-general 辞書=tech"}
+{"at":"2026-11-28T04:45:42.410Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":344.9,"label":"stream gRz3W8uGnaQ -a-general 辞書=zenntech"}
+{"at":"2026-11-28T04:53:39.905Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":100.9,"label":"操作動画の収録: ライブ字幕（スライド＋技術用語の辞書）"}
+{"at":"2026-11-28T04:53:39.907Z","month":"2026-11","api":"async","engine":"-a-general","seconds":100.9,"label":"操作動画の収録: アーカイブ字幕"}
+{"at":"2026-11-28T04:53:39.908Z","month":"2026-11","api":"async","engine":"-a-general","seconds":100.9,"sentiment":true,"label":"操作動画の収録: 振り返り（感情解析つき）"}
+{"at":"2026-11-28T05:01:30.725Z","month":"2026-11","api":"websocket","engine":"-a-general","seconds":100.8,"label":"操作動画の収録: 収録スクリプトの誤操作で 2 回目の配信が始まった分（ライブ）"}
+{"at":"2026-11-28T05:01:30.725Z","month":"2026-11","api":"async","engine":"-a-general","seconds":100.8,"label":"操作動画の収録: 2 回目の配信のアーカイブ字幕（誤操作）"}
+{"at":"2026-11-28T05:01:30.725Z","month":"2026-11","api":"async","engine":"-a-general","seconds":100.8,"sentiment":true,"label":"操作動画の収録: 2 回目の配信の振り返り（誤操作）"}
