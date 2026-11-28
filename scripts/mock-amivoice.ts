@@ -13,7 +13,12 @@
 // 登録されていない語はカタカナの誤認識（信頼度を低く）にして、辞書と信頼度の表示を画面で確かめられるようにしている。
 // 話者ダイアライゼーション・フィラー・感情分析は、それらしい値を作って返すだけで、音声の中身は見ていない。
 // 感情分析の結果のキー名と、パラメータ一覧の JSON の形は公開マニュアルに無いため、仮のもの。
+//
+// MOCK_REPLAY=eval/out/rag.a-general.slides.jsonl のように eval/stream.ts の記録を指定すると、WebSocket API は例文の代わりに、
+// 記録した本物の AmiVoice の応答（途中結果・確定結果）を、受け取った音声の長さに合わせて返す。
+// 記録と同じ音声（この例なら eval/data/rag.wav）を流すと、AmiVoice を使わずに本物どおりの字幕が出る。
 
+import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
 import { parseStartParam } from "../src/shared/amivoice.ts";
@@ -44,6 +49,20 @@ const SENTENCES = [
   "音声認識には {3} を使っていて {4} で専門用語を登録しています",
   "{5} からは外向きの {1} で認識サーバにつないでいます",
 ];
+
+/** 記録した応答（音声の位置と、AmiVoice が返した文字列） */
+const REPLAY = process.env.MOCK_REPLAY ? loadReplay(process.env.MOCK_REPLAY) : null;
+
+function loadReplay(path: string): { audioMs: number; raw: string }[] {
+  const events = readFileSync(path, "utf8")
+    .trim()
+    .split("\n")
+    .map((l) => JSON.parse(l) as { audioMs?: number; raw?: string })
+    .filter((r): r is { audioMs: number; raw: string } => typeof r.raw === "string" && typeof r.audioMs === "number" && /^(S |C$|E |U |A )/.test(r.raw))
+    .map((r) => ({ audioMs: r.audioMs, raw: r.raw.replace(/\r?\n$/, "") }));
+  console.log(`[mock] ${path} の応答 ${events.length} 件を再生します`);
+  return events;
+}
 
 /** 質問役の話者が話す例文（話者ダイアライゼーションの確認用）。ラベルは欠番を含めて speaker2 にする */
 const QUESTION_SENTENCE = 3;
@@ -123,6 +142,8 @@ interface Session {
   silenceMs: number;
   lastPartialMs: number;
   utterance: number;
+  /** 次に返す記録の位置（MOCK_REPLAY のとき） */
+  replayIndex: number;
 }
 
 function onConnection(ws: WebSocket): void {
@@ -139,6 +160,7 @@ function onConnection(ws: WebSocket): void {
     silenceMs: 0,
     lastPartialMs: 0,
     utterance: 0,
+    replayIndex: 0,
   };
 
   ws.on("message", (data, isBinary) => {
@@ -157,7 +179,9 @@ function onConnection(ws: WebSocket): void {
         );
         ws.send("s");
       } else if (text === "e") {
-        if (s.inSpeech) endUtterance(ws, s);
+        // 記録の再生では、送られた音声の少し先までの応答（話し終えた発話の確定結果）を返してから閉じる
+        if (REPLAY) flushReplay(ws, s, s.audioMs + 2000);
+        else if (s.inSpeech) endUtterance(ws, s);
         setTimeout(() => ws.send("e"), FINALIZE_DELAY_MS + 50);
       }
       return;
@@ -182,12 +206,20 @@ function rmsOf(pcm: Buffer, from: number, to: number): number {
   return n === 0 ? 0 : Math.sqrt(sum / n);
 }
 
+function flushReplay(ws: WebSocket, s: Session, untilMs: number): void {
+  while (REPLAY && s.replayIndex < REPLAY.length && REPLAY[s.replayIndex]!.audioMs <= untilMs) ws.send(REPLAY[s.replayIndex++]!.raw);
+}
+
 function onAudio(ws: WebSocket, s: Session, pcm: Buffer): void {
   const samples = Math.floor(pcm.length / 2);
   if (samples === 0) return;
   const rms = rmsOf(pcm, 0, samples * 2);
   const chunkMs = (samples / SAMPLE_RATE) * 1000;
   s.audioMs += chunkMs;
+  if (REPLAY) {
+    flushReplay(ws, s, s.audioMs);
+    return;
+  }
 
   if (rms >= SPEECH_RMS) {
     s.silenceMs = 0;

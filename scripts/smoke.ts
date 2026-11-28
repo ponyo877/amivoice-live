@@ -83,6 +83,7 @@ const created = (await (
 if (!created.roomId || !created.token) throw new Error(`ルームを作れませんでした: ${created.error}`);
 const { roomId, token } = created;
 console.log(`ルーム: ${roomId}  参加者用: ${base}/view.html?room=${roomId}`);
+console.log(`登壇者用: ${base}/speaker.html#room=${roomId}&token=${token}`);
 
 // 2. 辞書を保存する
 const dict = await fetch(`${base}/api/rooms/${roomId}/dictionary`, {
@@ -103,6 +104,8 @@ console.log(`辞書: HTTP ${dict.status}`);
 // 3. 参加者として接続し、届いたものを数える
 let finals = 0;
 let partials = 0;
+let summaries = 0;
+let summaryState = "idle";
 const viewer = await open(`${wsBase}/api/rooms/${roomId}/ws?role=viewer`, "viewer", (msg) => {
   if (msg.type === "final") {
     finals++;
@@ -111,6 +114,12 @@ const viewer = await open(`${wsBase}/api/rooms/${roomId}/ws?role=viewer`, "viewe
     console.log(`  [字幕]${line.speaker !== undefined ? ` 話者${line.speaker + 1}:` : ""} ${line.text}${unsure.length ? `  （自信なし: ${unsure.join("、")}）` : ""}`);
   } else if (msg.type === "partial") {
     partials++;
+  } else if (msg.type === "summary" && msg.summary) {
+    summaries++;
+    const s = msg.summary as { upToMs: number; topic: string; now: string; diagram: { nodes: { label: string }[]; edges: unknown[] } };
+    console.log(`  [まとめ] ${Math.round(s.upToMs / 1000)} 秒まで: ${s.topic} ／ いま: ${s.now} ／ 図 ${s.diagram.nodes.length} 節 ${s.diagram.edges.length} 本`);
+  } else if (msg.type === "summary-state") {
+    summaryState = msg.state as string;
   }
 });
 
@@ -122,6 +131,7 @@ const speaker = await open(`${wsBase}/api/rooms/${roomId}/ws?role=speaker&token=
     if (msg.state === "open") ready = true;
   }
   if (msg.type === "stats") console.log(`  [計測] ${JSON.stringify(msg.stats)}`);
+  if (msg.type === "summary-state" && msg.state === "error") console.log(`  [まとめ] ${msg.message}`);
   if (msg.type === "talks") talks = msg.talks as typeof talks;
   if (msg.type === "usage") {
     const u = msg.usage as { seconds: number; limitSeconds: number | null; sentimentSeconds: number };
@@ -153,11 +163,13 @@ for (let i = 0; i < 10; i++) {
 }
 speaker.send(JSON.stringify({ type: "stop" }));
 await sleep(3000);
+// 最後のまとめ（終了後に作る）を待つ
+for (let i = 0; i < 40 && summaryState === "working"; i++) await sleep(500);
 
 // 5. 書き出し
 const md = await (await fetch(`${base}/api/rooms/${roomId}/transcript?format=md`)).text();
 console.log("\n--- Markdown ---\n" + md);
-console.log(`AmiVoice 接続: ${ready ? "成功" : "失敗"}  途中結果: ${partials} 件  確定: ${finals} 件`);
+console.log(`AmiVoice 接続: ${ready ? "成功" : "失敗"}  途中結果: ${partials} 件  確定: ${finals} 件  まとめ: ${summaries} 回`);
 viewer.close();
 
 // 6. 終了後のアーカイブと振り返り（非同期 HTTP API）を待つ
